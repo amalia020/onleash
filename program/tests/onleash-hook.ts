@@ -64,9 +64,9 @@ describe("onleash-hook", () => {
   );
 
   // Policy values for these tests
-  const PER_TX_MAX = 10n * 10n ** BigInt(decimals); // 10 tokens
-  const DAILY_CAP = 50n * 10n ** BigInt(decimals); // 50 tokens
-  const TOTAL_MINT = 1_000n * 10n ** BigInt(decimals); // 1000 tokens minted
+  const PER_TX_MAX = 10n * 1_000_000n; // 10 tokens
+  const DAILY_CAP = 50n * 1_000_000n; // 50 tokens
+  const TOTAL_MINT = 1_000n * 1_000_000n; // 1000 tokens minted
 
   // Policy PDA
   const [policyPda] = PublicKey.findProgramAddressSync(
@@ -191,7 +191,7 @@ describe("onleash-hook", () => {
   // ─── Happy path ──────────────────────────────────────────────────────────
 
   it("PASS: transfers 5 tokens to allowlisted destination", async () => {
-    const amount = 5n * 10n ** BigInt(decimals);
+    const amount = 5n * 1_000_000n;
     const ix = await createTransferCheckedWithTransferHookInstruction(
       connection,
       sourceTokenAccount,
@@ -215,7 +215,7 @@ describe("onleash-hook", () => {
   // ─── Negative: destination not allowlisted ───────────────────────────────
 
   it("FAIL: transfer to attacker dest reverts (DestinationNotAllowed 6001)", async () => {
-    const amount = 1n * 10n ** BigInt(decimals);
+    const amount = 1n * 1_000_000n;
     const ix = await createTransferCheckedWithTransferHookInstruction(
       connection,
       sourceTokenAccount,
@@ -245,7 +245,7 @@ describe("onleash-hook", () => {
   // ─── Negative: per-tx cap ────────────────────────────────────────────────
 
   it("FAIL: transfer 20 (> per_tx_max=10) reverts (ExceedsPerTxMax 6002)", async () => {
-    const amount = 20n * 10n ** BigInt(decimals);
+    const amount = 20n * 1_000_000n;
     const ix = await createTransferCheckedWithTransferHookInstruction(
       connection,
       sourceTokenAccount,
@@ -277,7 +277,7 @@ describe("onleash-hook", () => {
   it("FAIL: 4 more 10-token transfers + 1 more reverts (ExceedsDailyCap 6003)", async () => {
     // Already spent 5 (from happy path). Transfer 10 four more times → 5+40=45.
     // Daily cap is 50. The 5th 10-token transfer would push to 55 → revert.
-    const ten = 10n * 10n ** BigInt(decimals);
+    const ten = 10n * 1_000_000n;
 
     for (let i = 0; i < 4; i++) {
       const ix = await createTransferCheckedWithTransferHookInstruction(
@@ -296,7 +296,7 @@ describe("onleash-hook", () => {
       await sendAndConfirmTransaction(connection, tx, [wallet.payer]);
     }
     let policy = await program.account.policy.fetch(policyPda);
-    expect(policy.spentToday.toString()).to.eq((5n * 10n ** BigInt(decimals) + 4n * ten).toString());
+    expect(policy.spentToday.toString()).to.eq((5n * 1_000_000n + 4n * ten).toString());
 
     // Now the next 10-token transfer pushes spent_today over daily_cap → revert
     const overIx = await createTransferCheckedWithTransferHookInstruction(
@@ -359,7 +359,7 @@ describe("onleash-hook", () => {
   // ─── Authority can update ────────────────────────────────────────────────
 
   it("PASS: authority can raise daily_cap via update_policy", async () => {
-    const newDaily = new anchor.BN((100n * 10n ** BigInt(decimals)).toString());
+    const newDaily = new anchor.BN((100n * 1_000_000n).toString());
     await program.methods
       .updatePolicy(null, newDaily, null)
       .accounts({
