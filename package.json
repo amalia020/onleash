@@ -1,0 +1,13 @@
+{
+  "name": "onleash",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Token-2022 transfer hook for AI agent wallets — mint-layer policy enforcement",
+  "scripts": {
+    "build": "pnpm -r build",
+    "build:sdk": "pnpm --filter @onleash/sdk build",
+    "build:program": "cd program && anchor build",
+    "test:program": "cd program && anchor test"
+  },
+  "packageManager": "pnpm@9.15.9"
+}

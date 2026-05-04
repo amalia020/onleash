@@ -1,0 +1,11 @@
+node_modules
+dist
+.next
+.turbo
+.env
+.env.local
+program/target
+program/.anchor
+**/test-ledger
+.DS_Store
+*.log
