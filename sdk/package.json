@@ -4,11 +4,15 @@
   "description": "TypeScript SDK + solana-agent-kit plugin for Onleash policy-protected mints",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "smoke": "ts-node --transpile-only scripts/smoke.ts"
   },
   "license": "MIT",
   "peerDependencies": {
@@ -21,7 +25,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "typescript": "^5.6.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.0"
   }
 }
