@@ -1,3 +1,23 @@
-// @onleash/sdk — entrypoint
-// Real implementation lands after Phase 4 (program build) so we can import the IDL types.
-export const PLACEHOLDER = "onleash-sdk-pre-phase-6";
+/**
+ * @onleash/sdk — Token-2022 transfer-hook policy for AI agent wallets.
+ *
+ * Public surface:
+ *   - OnleashClient   ─ Anchor-backed client (deploy mint, init/update policy, transfer)
+ *   - PolicyAccount   ─ on-chain policy state
+ *   - ONLEASH_PROGRAM_ID, policyPda, metaListPda
+ *   - createOnleashActions  ─ Zod-schema'd actions for solana-agent-kit
+ */
+
+export {
+  OnleashClient,
+  ONLEASH_PROGRAM_ID,
+  policyPda,
+  metaListPda,
+  POLICY_SEED,
+  META_LIST_SEED,
+  type PolicyAccount,
+  type DeployProtectedMintParams,
+  type DeployProtectedMintResult,
+} from "./client";
+
+export { createOnleashActions } from "./actions";
