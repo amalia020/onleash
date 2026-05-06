@@ -20,7 +20,24 @@ A Solana Anchor program + TypeScript SDK. You create a **policy-protected Token-
 
 1. **Is this destination approved?** (allowlist of up to 8 token accounts)
 2. **Is this amount under the per-tx cap?**
-3. **Is todays
+3. **Is today's cumulative spend under the daily cap?** (24h rolling window, auto-resets)
+
+Any failure reverts the entire transaction atomically. The agent signed it. The chain refused to clear it.
+
+```ts
+import { OnleashClient } from "@onleash/sdk";
+
+const client = new OnleashClient(connection, wallet);
+await client.deployProtectedMint({
+  decimals: 6,
+  perTxMax: 10_000_000n,        // 10 tokens per transfer
+  dailyCap: 50_000_000n,         // 50 tokens per 24h rolling window
+  allowlist: [approvedPoolATA],  // up to 8 approved destinations
+});
+// Every transfer of this mint now goes through the on-chain policy.
+```
+
+---
 
 ## Architecture
 
