@@ -37,6 +37,20 @@ export default function Integrate() {
         </div>
       </section>
 
+      {/* ── COMPATIBILITY ───────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-10 bg-[color:var(--paper-2)]">
+        <div className="mx-auto max-w-5xl flex flex-col sm:flex-row gap-6 sm:items-center sm:justify-between">
+          <div>
+            <p className="font-[family-name:var(--font-mono-family)] text-[10px] uppercase tracking-[0.2em] text-[color:var(--brand)]">✓ Orca Whirlpools compatible</p>
+            <p className="mt-1 text-sm text-[color:var(--ink-2)] max-w-xl">Onleash-protected tokens work in Orca pools via TokenBadge. Policy enforcement doesn&apos;t break DeFi composability — your agent can still swap through the deepest Solana liquidity.</p>
+          </div>
+          <a href="https://github.com/amalia020/onleash" target="_blank" rel="noreferrer"
+            className="font-[family-name:var(--font-mono-family)] flex-shrink-0 inline-flex items-center gap-2 border-2 border-[color:var(--line-strong)] px-4 py-2.5 text-xs uppercase tracking-[0.16em] text-[color:var(--ink-2)] hover:border-[color:var(--brand-line)] hover:text-[color:var(--brand)] transition-colors">
+            View compatibility notes →
+          </a>
+        </div>
+      </section>
+
       {/* ── QUICKSTART ───────────────────────────────────────────── */}
       <section className="border-b border-[color:var(--line)] px-6 py-14 bg-[color:var(--paper-2)]">
         <div className="mx-auto max-w-5xl">

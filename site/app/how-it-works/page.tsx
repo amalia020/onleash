@@ -180,6 +180,6 @@ const CHECKS = [
 
 const WHY_SOLANA = [
   { label: "Primitive",  title: "Token-2022 transfer hooks",   desc: "The only chain with a native hook that fires atomically on every token transfer — unbypassable at the protocol level, not your application code." },
-  { label: "Economics",  title: "Sub-cent per transfer",       desc: "The Onleash hook adds ~5,000 compute units per transfer. At current fees, policy enforcement costs under $0.001 per transaction." },
-  { label: "Ecosystem",  title: "ElizaOS · solana-agent-kit", desc: "The two dominant AI agent frameworks are both Solana-native. Onleash ships as a plugin PR — 5-line drop-in for any existing agent." },
+  { label: "Economics",  title: "Sub-cent per transfer",       desc: "On Ethereum, a policy check per transfer would cost $5+ in gas — making it economically unviable. On Solana it costs $0.001. That's the difference between a protocol primitive and a theoretical idea." },
+  { label: "Ecosystem",  title: "ElizaOS · solana-agent-kit", desc: "Draft PR #565 open to sendaifun/solana-agent-kit — the main Solana AI agent framework. ElizaOS and Griffain both build on it. 5-line drop-in for any existing agent." },
 ];

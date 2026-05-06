@@ -22,9 +22,12 @@ export default function Home() {
             Every AI agent with a wallet is one prompt away from getting rugged.
           </h1>
           <div className="mt-4 h-1 w-32 bg-[color:var(--brand)] animate-fade-up-delay-2" />
-          <p className="mt-7 max-w-2xl text-lg leading-relaxed text-[color:var(--ink-2)] animate-fade-up-delay-2">
-            Onleash puts spending policy <em>inside the token itself</em> — enforced by
-            the Solana network on every transfer. A jailbroken agent can sign anything.
+          <p className="mt-7 max-w-2xl text-xl font-semibold leading-snug text-[color:var(--ink)] animate-fade-up-delay-2">
+            Onleash gives your AI agent a prepaid card instead of a credit card.
+          </p>
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-[color:var(--ink-2)] animate-fade-up-delay-2">
+            Spending policy lives <em>inside the token itself</em> via Token-2022 transfer hooks — enforced
+            by the Solana network on every transfer. A jailbroken agent can sign anything.
             The chain refuses to clear it.
           </p>
           <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center animate-fade-up-delay-3">
@@ -256,7 +259,7 @@ const STATS = [
   { value: "$653K",  label: "Drained in documented attacks" },
   { value: "$77M",   label: "Agent wallet TVL today" },
   { value: "10/10",  label: "Tests passing on devnet" },
-  { value: "<300",   label: "Lines of Rust" },
+  { value: "PR #565", label: "solana-agent-kit plugin open" },
 ];
 
 const INCIDENTS = [
