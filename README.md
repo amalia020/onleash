@@ -1,44 +1,26 @@
----
-noteId: "7685bd2047cd11f19fe9dd518d27468c"
-tags: []
-
----
-
 # Onleash
 
-> **Token-2022 transfer hook for AI agent wallets.** Spending policy enforced at the mint layer, not in middleware. A jailbroken agent can sign anything — the chain refuses to clear it.
+**For developers building AI agents on Solana:** your agent has its own keypair and can sign any transaction it wants. That is by design — agents need to act autonomously. But when an agent gets jailbroken or prompt-injected, "can sign anything" becomes "can drain everything."
+
+Onleash gives your agent a **prepaid card instead of a credit card.**
+
+The agent keeps its own key. You set a policy — max 10 tokens per transfer, max 50 per day, only these approved destinations. That policy lives in the token itself, enforced by the Solana network on every single transfer. The agent cannot bypass it. Middleware can be bypassed. The chain cannot.
+
+**[Try the live demo — watch a real attack get blocked on-chain](https://onleash.vercel.app)**
 
 [![Devnet](https://img.shields.io/badge/devnet-deployed-success)](https://explorer.solana.com/address/7vJ2fa6dr3Tnx8whNAepUMmpytAnEZxcASMyH2jAuG7v?cluster=devnet)
 [![Tests](https://img.shields.io/badge/tests-10%2F10%20passing-success)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)]()
 
-```ts
-import { OnleashClient } from "@onleash/sdk";
-
-const client = new OnleashClient(connection, wallet);
-await client.deployProtectedMint({
-  decimals: 6,
-  perTxMax: 10_000_000n,        // 10 tokens per transfer
-  dailyCap: 50_000_000n,         // 50 tokens per 24h rolling window
-  allowlist: [approvedPoolATA],  // up to 8 approved destinations
-});
-```
-
-That's it. Every subsequent transfer of this mint goes through the on-chain hook, which validates against the policy. Violations revert the entire transaction atomically.
-
 ---
 
-## Why
+## What you get
 
-AI agents that hold real wallets are getting drained. Freysa Act I ($47K, Nov 2024). aixbt × Simulacrum ($106K, Mar 2025). ElizaOS × Princeton (mainnet ETH drained, Mar 2025). LLM router replacement attack ($500K, Apr 2026).
+A Solana Anchor program + TypeScript SDK. You create a **policy-protected Token-2022 mint**. Your agent holds tokens from that mint. Every transfer — including CPIs from DEXes and vaults — automatically runs the Onleash hook on-chain before settling. Three checks:
 
-Existing defenses — Turnkey, Privy, Coinbase AgentKit, Lit, Squads — all enforce policy at the **wallet** or **signer** layer. Middleware gets bypassed. Once the agent has a key, it can sign anything.
-
-Onleash moves the policy into the **token itself**, via Solana's Token-2022 transfer hook extension. The chain runs the hook on every transfer; the agent doesn't get a vote.
-
-> _Signer-layer policy trusts the agent. Asset-layer policy doesn't have to._
-
----
+1. **Is this destination approved?** (allowlist of up to 8 token accounts)
+2. **Is this amount under the per-tx cap?**
+3. **Is todays
 
 ## Architecture
 
