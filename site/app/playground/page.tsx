@@ -171,6 +171,7 @@ export default function Playground() {
               </div>
               <input type="range" min={min} max={max}
                 value={policy[key]}
+                aria-label={label}
                 onChange={e => setPolicy(p => ({ ...p, [key]: Number(e.target.value) }))}
                 className="w-full accent-[color:var(--brand)]" />
               <div className="mt-2 flex items-center justify-between">

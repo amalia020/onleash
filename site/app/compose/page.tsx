@@ -27,7 +27,10 @@ const DEFAULT: PolicyConfig = {
   decimals: 6,
 };
 
+const U64_MAX = "18446744073709551615n";
+
 function toRaw(tokens: number, decimals: number): string {
+  if (tokens === 0) return U64_MAX; // 0 = no limit
   return `${tokens}n * ${"1" + "0".repeat(decimals)}n`;
 }
 
@@ -43,8 +46,8 @@ function generateCode(cfg: PolicyConfig): string {
     ``,
     `const { mint } = await client.deployProtectedMint({`,
     `  decimals:  ${cfg.decimals},`,
-    ...(cfg.perTxMax > 0 ? [`  perTxMax:  ${toRaw(cfg.perTxMax, cfg.decimals)},   // ${cfg.perTxMax.toLocaleString()} tokens max per transfer`] : [`  // perTxMax: not enforced`]),
-    ...(cfg.dailyCap > 0 ? [`  dailyCap:  ${toRaw(cfg.dailyCap, cfg.decimals)},   // ${cfg.dailyCap.toLocaleString()} tokens max per 24h`] : [`  // dailyCap: not enforced`]),
+    `  perTxMax:  ${toRaw(cfg.perTxMax, cfg.decimals)},   // ${cfg.perTxMax === 0 ? "no limit (u64::MAX)" : cfg.perTxMax.toLocaleString() + " tokens max per transfer"}`,
+    `  dailyCap:  ${toRaw(cfg.dailyCap, cfg.decimals)},   // ${cfg.dailyCap === 0 ? "no limit (u64::MAX)" : cfg.dailyCap.toLocaleString() + " tokens max per 24h"}`,
     `  allowlist: [${cfg.allowlist.map(a => `new PublicKey("${a}")`).join(", ") || "/* add approved ATAs */"}],`,
   ];
   if (cfg.cooldownSecs > 0) lines.push(`  cooldownSecs: ${cfg.cooldownSecs},              // ${cfg.cooldownSecs}s between transfers`);

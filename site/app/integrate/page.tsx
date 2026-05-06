@@ -33,7 +33,7 @@ export default function Integrate() {
       <section className="border-b border-[color:var(--line)] px-6 py-14">
         <div className="mx-auto max-w-5xl">
           <SectionLabel>Install</SectionLabel>
-          <Code>{`pnpm add @onleash/sdk @solana/web3.js @solana/spl-token`}</Code>
+          <Code>{`pnpm add github:amalia020/onleash @solana/web3.js @solana/spl-token`}</Code>
         </div>
       </section>
 

@@ -56,6 +56,7 @@ export default function Nav() {
             {/* More dropdown */}
             <div className="relative">
               <button type="button"
+                onKeyDown={e => e.key === "Escape" && setMoreOpen(false)}
                 onClick={() => setMoreOpen(o => !o)}
                 className={`${mono} relative px-3 py-1.5 text-xs uppercase tracking-[0.16em] transition-colors flex items-center gap-1
                   ${isMoreActive ? "text-[color:var(--ink)]" : "text-[color:var(--ink-2)] hover:text-[color:var(--ink)]"}`}>
