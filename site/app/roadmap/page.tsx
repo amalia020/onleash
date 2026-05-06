@@ -5,7 +5,7 @@ export default function Roadmap() {
   return (
     <main style={{ background: "var(--paper)", color: "var(--ink)" }}>
 
-      {/* ── HEADER ───────────────────────────────────────────────── */}
+      {/* ── HEADER */}
       <section className="border-b border-[color:var(--line)] px-6 pt-14 pb-16">
         <div className="mx-auto max-w-5xl">
           <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>Roadmap</p>
@@ -16,76 +16,95 @@ export default function Roadmap() {
             Onleash v1 is a policy primitive for Token-2022 mints. The same PDA pattern
             is backwards-compatible — v1 mints stay valid forever as we extend the protocol.
           </p>
+          <div className="mt-6 flex flex-wrap gap-4">
+            <div className={`${mono} inline-flex items-center gap-2 bg-[color:var(--brand)] px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] text-white`}>
+              13/13 tests · devnet
+            </div>
+            <div className={`${mono} inline-flex items-center gap-2 border-2 border-[color:var(--brand-line)] px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] text-[color:var(--brand)]`}>
+              Mainnet target · Q3 2026
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── V1 STATUS ────────────────────────────────────────────── */}
-      <section className="border-b border-[color:var(--line)] px-6 py-14">
+      {/* ── 3-COLUMN TABLE */}
+      <section className="border-b border-[color:var(--line)] px-6 py-16">
         <div className="mx-auto max-w-5xl">
-          <div className={`${mono} mb-4 inline-flex items-center gap-2 bg-[color:var(--brand)] px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] text-white`}>
-            ✓ v1 · live on devnet
-          </div>
-          <h2 className={`${display} text-2xl font-black sm:text-3xl`}>What shipped</h2>
-          <div className="mt-8 grid gap-px bg-[color:var(--line)] sm:grid-cols-2 lg:grid-cols-3">
-            {V1_ITEMS.map(item => (
-              <div key={item} className="bg-[color:var(--paper-2)] p-5 flex items-start gap-3">
-                <span className="text-[color:var(--success)] font-bold mt-0.5 flex-shrink-0">✓</span>
-                <span className="text-sm">{item}</span>
+          <div className="grid gap-px bg-[color:var(--line)] sm:grid-cols-3">
+
+            <div className="bg-[color:var(--paper)]">
+              <div className="border-b border-[color:var(--line)] px-5 py-4 flex items-center gap-2">
+                <span className="text-[color:var(--success)] font-bold">✓</span>
+                <span className={`${mono} text-xs uppercase tracking-[0.16em] font-bold`}>Done</span>
               </div>
-            ))}
-          </div>
-          <div className={`${mono} mt-6 flex flex-wrap gap-6 text-xs text-[color:var(--ink-2)]`}>
-            <span><span className="text-[color:var(--brand)]">10/10</span> tests passing</span>
-            <span><span className="text-[color:var(--brand)]">&lt;300</span> lines of Rust</span>
-            <span><span className="text-[color:var(--brand)]">MIT</span> licensed</span>
-            <span><span className="text-[color:var(--brand)]">Devnet</span> deployed</span>
+              <div className="divide-y divide-[color:var(--line)]">
+                {DONE.map(item => (
+                  <div key={item.title} className="px-5 py-4">
+                    <div className="text-sm font-bold leading-snug">{item.title}</div>
+                    <p className="mt-1 text-xs text-[color:var(--ink-2)] leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-[color:var(--paper-2)]">
+              <div className="border-b border-[color:var(--line)] px-5 py-4 flex items-center gap-2">
+                <span className="text-[color:var(--brand)] font-bold">●</span>
+                <span className={`${mono} text-xs uppercase tracking-[0.16em] font-bold text-[color:var(--brand)]`}>In progress</span>
+              </div>
+              <div className="divide-y divide-[color:var(--line)]">
+                {IN_PROGRESS.map(item => (
+                  <div key={item.title} className="px-5 py-4">
+                    <div className="text-sm font-bold leading-snug">{item.title}</div>
+                    <p className="mt-1 text-xs text-[color:var(--ink-2)] leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-[color:var(--paper)]">
+              <div className="border-b border-[color:var(--line)] px-5 py-4 flex items-center gap-2">
+                <span className="text-[color:var(--ink-3)] font-bold">○</span>
+                <span className={`${mono} text-xs uppercase tracking-[0.16em] font-bold text-[color:var(--ink-2)]`}>Planned</span>
+              </div>
+              <div className="divide-y divide-[color:var(--line)]">
+                {PLANNED.map(item => (
+                  <div key={item.title} className="px-5 py-4">
+                    <div className="text-sm font-bold leading-snug">{item.title}</div>
+                    <p className="mt-1 text-xs text-[color:var(--ink-2)] leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
 
-      {/* ── V2 ───────────────────────────────────────────────────── */}
+      {/* ── MAINNET ETA */}
       <section className="border-b border-[color:var(--line)] px-6 py-14 bg-[color:var(--paper-2)]">
         <div className="mx-auto max-w-5xl">
-          <div className={`${mono} mb-4 inline-flex items-center gap-2 border-2 border-[color:var(--line-strong)] px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] text-[color:var(--ink-2)]`}>
-            v2 · in design
-          </div>
-          <h2 className={`${display} text-2xl font-black sm:text-3xl`}>Richer policy, same primitive</h2>
-          <p className="mt-4 max-w-2xl text-sm text-[color:var(--ink-2)]">
-            Same hook program, same Policy PDA pattern — just richer state and more instructions. Backwards-compatible with a version bump.
-          </p>
-          <div className="mt-8 grid gap-px bg-[color:var(--line)] sm:grid-cols-2">
-            {V2_ITEMS.map(item => (
-              <div key={item.title} className="bg-[color:var(--paper)] p-5">
-                <div className="font-bold text-sm">{item.title}</div>
-                <p className="mt-1.5 text-xs text-[color:var(--ink-2)] leading-relaxed">{item.desc}</p>
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>mainnet timeline</p>
+          <h2 className={`${display} mt-4 text-2xl font-black sm:text-3xl`}>What gates mainnet GA.</h2>
+          <div className="mt-8 grid gap-px bg-[color:var(--line)] sm:grid-cols-3">
+            {MAINNET_GATES.map((g, i) => (
+              <div key={g.label} className="bg-[color:var(--paper)] p-6">
+                <div className={`${mono} text-[10px] uppercase tracking-[0.16em] text-[color:var(--brand)] mb-2`}>Gate {i + 1}</div>
+                <div className="font-bold text-sm">{g.label}</div>
+                <p className="mt-2 text-xs text-[color:var(--ink-2)] leading-relaxed">{g.desc}</p>
+                <div className={`${mono} mt-3 text-[10px] uppercase tracking-[0.14em] ${g.done ? "text-[color:var(--success)]" : "text-[color:var(--ink-3)]"}`}>
+                  {g.done ? "✓ complete" : g.eta}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── LATER ────────────────────────────────────────────────── */}
-      <section className="border-b border-[color:var(--line)] px-6 py-14">
+      {/* ── TEST RESULTS */}
+      <section className="px-6 py-14">
         <div className="mx-auto max-w-5xl">
-          <div className={`${mono} mb-4 inline-flex items-center gap-2 border-2 border-[color:var(--line-strong)] px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] text-[color:var(--ink-2)]`}>
-            later
-          </div>
-          <h2 className={`${display} text-2xl font-black sm:text-3xl`}>Production-grade &amp; ecosystem</h2>
-          <div className="mt-8 grid gap-px bg-[color:var(--line)] sm:grid-cols-2 lg:grid-cols-3">
-            {LATER_ITEMS.map(item => (
-              <div key={item.title} className="bg-[color:var(--paper-2)] p-5">
-                <div className="font-bold text-sm">{item.title}</div>
-                <p className="mt-1.5 text-xs text-[color:var(--ink-2)] leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── TEST RESULTS ─────────────────────────────────────────── */}
-      <section className="px-6 py-14 bg-[color:var(--paper-2)]">
-        <div className="mx-auto max-w-5xl">
-          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>test results · devnet · 10/10</p>
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>test results · devnet · 13/13</p>
           <pre className="mt-6 overflow-x-auto border-2 border-[color:var(--line-strong)] p-5 text-xs leading-relaxed"
             style={{ background: "var(--code-bg)", color: "var(--code-fg)" }}>
             <code className={`${mono}`}>{TEST_OUTPUT}</code>
@@ -97,42 +116,54 @@ export default function Roadmap() {
   );
 }
 
-const V1_ITEMS = [
-  "Hook program with 3 checks (allowlist, per-tx, daily cap)",
-  "Per-mint Policy PDA",
-  "init_policy & update_policy admin instructions",
-  "TypeScript SDK — deploy / mint / transfer / fetch",
-  "Zod-schema'd actions for AI agent frameworks",
-  "Devnet deploy + 10/10 tests passing",
+const DONE = [
+  { title: "Hook program — 6 checks",     desc: "Allowlist, per-tx cap, daily cap, pause, cooldown, transfer count. All atomic." },
+  { title: "Per-mint Policy PDA",          desc: 'Seeds: ["policy", mint]. One policy per mint, authority-controlled.' },
+  { title: "init_policy + update_policy",  desc: "Admin instructions. All 6 policy fields updatable in one tx." },
+  { title: "TypeScript SDK",               desc: "deployProtectedMint, mintTo, transfer, fetchPolicy, ixInitPolicy, ixUpdatePolicy." },
+  { title: "AI agent actions",             desc: "5 Zod-schema actions for solana-agent-kit, Vercel AI, LangChain." },
+  { title: "pay.sh x402 integration",      desc: "ONLEASH_PAY_SH_PAYMENT action — blocks payment hijack via 402 redirect." },
+  { title: "solana-agent-kit PR #565",     desc: "Plugin open for review. Drop-in for every agent on the kit." },
+  { title: "Devnet deploy — 13/13 tests",  desc: "Program ID: 7vJ2fa6dr3Tnx8whNAepUMmpytAnEZxcASMyH2jAuG7v" },
+  { title: "Orca Whirlpools compatible",   desc: "Protected tokens work in Orca pools via TokenBadge." },
 ];
 
-const V2_ITEMS = [
-  { title: "Pyth USD-denominated caps",  desc: "'$10/tx, $50/day' instead of raw token units. Automatic oracle-backed conversion at transfer time." },
-  { title: "Plain-English policy DSL",   desc: "\"Agent can spend up to $100/day to approved suppliers\" — compiled to on-chain Policy PDA." },
-  { title: "USDC policy-wrapper mint",   desc: "Deposit USDC, get policy-USDC. Drop-in replacement for any agent already holding USDC." },
-  { title: "Per-counterparty caps",      desc: "\"Max $50/day to vendor X, $200/day to vendor Y\" — granular per-destination limits." },
-  { title: "Ephemeral approvals",        desc: "Time-limited one-off approvals that expire on-chain without admin action." },
-  { title: "Onleash Studio",             desc: "UI to author, preview, and deploy policies before minting — no code required." },
+const IN_PROGRESS = [
+  { title: "Mainnet deployment",        desc: "Anchor deploy to mainnet-beta. Smoke test: 1 pass + 1 revert tx on Explorer." },
+  { title: "Squads upgrade authority",  desc: "Moving from single deployer key to 2-of-3 multisig before GA." },
+  { title: "Security threat model",     desc: "Documented attack scenarios, honest scope, and v1 limitations." },
+  { title: "Live demo — /demo page",    desc: "Real devnet reverts end-to-end, no mocks, <10s round trip." },
 ];
 
-const LATER_ITEMS = [
-  { title: "Mainnet deployment",           desc: "Full audit by a recognized Solana security firm before mainnet GA." },
-  { title: "Multisig upgrade authority",   desc: "Squads 2-of-3 instead of single deployer key." },
-  { title: "solana-agent-kit upstream PR", desc: "Onleash ships as a first-class plugin in every agent built on the kit." },
-  { title: "Companion guards",             desc: "Permanent-delegate, policy-gated burn, close-account guard — closes gaps in the honest scope." },
-  { title: "DEX compatibility matrix",     desc: "Verified support for Orca Whirlpools, Meteora DLMM, Raydium permissionless pools." },
+const PLANNED = [
+  { title: "OtterSec / Neodyme audit",        desc: "Full program audit before mainnet GA recommendation to projects." },
+  { title: "Spend-log webhook",               desc: "POST to dev-configured URL on every TransferHookViolation." },
+  { title: "Pyth USD-denominated caps",       desc: "'$10/tx, $50/day' instead of raw token units. Oracle-backed at transfer time." },
+  { title: "Per-counterparty caps",           desc: "Granular per-destination limits within the same policy." },
+  { title: "Ephemeral time-locked approvals", desc: "One-off approvals that expire on-chain without admin action." },
+  { title: "Policy composer UI",              desc: "Plain-English rule compiled to Policy PDA. No code required." },
+  { title: "Companion guards",               desc: "Policy-gated burn, close-account guard — closes honest scope gaps." },
+  { title: "CI/CD + SDK publish",            desc: "GitHub Actions: Anchor test on PR, SDK publish on tag." },
+];
+
+const MAINNET_GATES = [
+  { label: "13/13 devnet tests", desc: "All 6 policy checks verified with real on-chain transactions on devnet.", done: true,  eta: "" },
+  { label: "Mainnet smoke test", desc: "1 passing + 1 reverting transfer on mainnet-beta, both signatures on Explorer.", done: false, eta: "ETA: Q2 2026" },
+  { label: "Security audit",     desc: "OtterSec or Neodyme review of the hook program before GA recommendation.", done: false, eta: "ETA: Q3 2026" },
 ];
 
 const TEST_OUTPUT = `onleash-hook
-  ✔ creates mint with transfer-hook extension               (728ms)
-  ✔ creates source + 2 destination ATAs and mints supply    (711ms)
-  ✔ initializes ExtraAccountMetaList                        (518ms)
-  ✔ initializes Policy with allowlist, per_tx=10, daily=50
-  ✔ PASS: transfers 5 tokens to allowlisted destination     (909ms)
-  ✔ FAIL: transfer to attacker dest → DestinationNotAllowed (6001)
-  ✔ FAIL: transfer 20 > per_tx_max=10 → ExceedsPerTxMax    (6002)
-  ✔ FAIL: cumulative transfers exceed daily cap             (6003)
-  ✔ FAIL: non-authority update_policy → Unauthorized        (6005)
-  ✔ PASS: authority raises daily_cap via update_policy
-
-10 passing (8s)`;
+  13 passing (11s)
+  ✔ creates mint with transfer-hook extension
+  ✔ creates source + destination ATAs and mints supply
+  ✔ initializes ExtraAccountMetaList
+  ✔ initializes Policy
+  ✔ PASS: transfer to allowlisted destination
+  ✔ FAIL: attacker dest → DestinationNotAllowed (6001)
+  ✔ FAIL: amount > per_tx_max → ExceedsPerTxMax (6002)
+  ✔ FAIL: cumulative > daily_cap → ExceedsDailyCap (6003)
+  ✔ FAIL: non-authority update → Unauthorized (6005)
+  ✔ PASS: authority raises daily_cap
+  ✔ FAIL: paused → PolicyPaused (6007)
+  ✔ FAIL: too soon → CooldownActive (6008)
+  ✔ FAIL: count exceeded → ExceedsTransferCount (6009)`;

@@ -299,7 +299,7 @@ export default function Home() {
             <span className={`${mono} text-[11px] uppercase tracking-[0.2em] text-[color:var(--ink-3)]`}>MIT · open source</span>
           </div>
           <div className="flex flex-wrap items-center gap-5">
-            {[{href:"/how-it-works",l:"How it works"},{href:"/demo",l:"Demo"},{href:"/integrate",l:"Integrate"},{href:"/roadmap",l:"Roadmap"}].map(({href,l})=>(
+            {[{href:"/how-it-works",l:"How it works"},{href:"/demo",l:"Demo"},{href:"/integrate",l:"Integrate"},{href:"/roadmap",l:"Roadmap"},{href:"/security",l:"Security"}].map(({href,l})=>(
               <Link key={href} href={href} className={`${mono} text-xs uppercase tracking-[0.16em] text-[color:var(--ink-2)] hover:text-[color:var(--ink)]`}>{l}</Link>
             ))}
             <a href="https://github.com/amalia020/onleash" target="_blank" rel="noreferrer"

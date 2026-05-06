@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/demo",         label: "Demo" },
   { href: "/integrate",    label: "Integrate" },
   { href: "/roadmap",      label: "Roadmap" },
+  { href: "/security",    label: "Security" },
 ];
 
 export default function Nav() {
