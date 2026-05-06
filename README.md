@@ -39,6 +39,26 @@ await client.deployProtectedMint({
 
 ---
 
+## Why this only works on Solana
+
+Ethereum has no equivalent to Token-2022 transfer hooks. There is no native extension that fires a program on every token transfer without wrapping the token in a custom contract -- which breaks composability and costs $5+ gas per check, making it economically useless as a runtime policy.
+
+Solana Token-2022 has a built-in `TransferHook` extension. When set on a mint, Token-2022 CPIs into your hook program on every `Transfer` and `TransferChecked`. It runs inside the Token-2022 program itself -- not in middleware, not in your agent code, not in a multisig. The Solana runtime enforces it. At sub-cent fees, running a policy check on every transfer is economically viable. This is a Solana-native primitive.
+
+---
+
+## The incidents that made this necessary
+
+AI agents that hold real wallets are getting drained. Freysa Act I ($47K, Nov 2024). aixbt x Simulacrum ($106K, Mar 2025). ElizaOS x Princeton (mainnet ETH drained, Mar 2025). LLM router replacement attack ($500K, Apr 2026).
+
+Existing defenses -- Turnkey, Privy, Coinbase AgentKit, Lit, Squads -- all enforce policy at the **wallet** or **signer** layer. Middleware gets bypassed. Once the agent has a key, it can sign anything.
+
+Onleash moves the policy into the **token itself**, via Solana Token-2022 transfer hook extension. The chain runs the hook on every transfer; the agent does not get a vote.
+
+> _Signer-layer policy trusts the agent. Asset-layer policy does not have to._
+
+---
+
 ## Architecture
 
 ```
@@ -71,7 +91,7 @@ The hook is invoked on `Transfer`, `TransferChecked`, and `TransferCheckedWithFe
 onleash/
 ├── program/    Anchor program (Rust)        — the transfer hook
 ├── sdk/        @onleash/sdk (TypeScript)    — client + AI agent actions
-├── site/       Next.js demo (TBD)            — public live-attack site
+├── site/       Next.js demo                  — public live-attack site (deployed)
 └── README.md
 ```
 
@@ -217,7 +237,7 @@ Roadmap will pair the hook with companion guards (permanent-delegate, policy-gat
 - [x] Zod-schema'd actions for AI agent frameworks
 - [x] Devnet deploy + 10/10 tests passing
 - [ ] Mainnet deploy
-- [ ] Public live-attack demo site
+- [x] Public live-attack demo site (deployed: https://onleash.vercel.app)
 - [ ] Companion guards (permanent-delegate, burn-policy, close-guard)
 - [x] solana-agent-kit upstream PR (draft open: [sendaifun/solana-agent-kit#565](https://github.com/sendaifun/solana-agent-kit/pull/565))
 - [ ] DEX compatibility matrix (Orca Whirlpools: **compatible** via TokenBadge — [confirmed](https://dev.orca.so/Architecture%20Overview/TokenExtensions%20Support/); Meteora DLMM next)
