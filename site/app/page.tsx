@@ -201,6 +201,58 @@ export default function Home() {
         </div>
       </section>
 
+
+      {/* ── PAY.SH INTEGRATION ───────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-20">
+        <div className="mx-auto max-w-5xl">
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>
+            pay.sh · x402 · new
+          </p>
+          <h2 className={`${display} mt-4 text-3xl font-black sm:text-4xl`}>
+            Agents that pay for API calls.<br />
+            <span className="text-[color:var(--brand)]">Safely.</span>
+          </h2>
+          <p className="mt-5 max-w-2xl text-base text-[color:var(--ink-2)]">
+            pay.sh lets AI agents pay for API calls autonomously via HTTP 402 / x402.
+            Powerful — but a jailbroken agent can be coerced into redirecting that payment
+            to an attacker instead of the real provider. Onleash closes this gap:
+            only approved pay.sh provider addresses can receive payments.
+            The chain blocks everything else.
+          </p>
+          <div className="mt-10 grid gap-px bg-[color:var(--line)] sm:grid-cols-2">
+            {/* without */}
+            <div className="bg-[color:var(--paper)] p-6">
+              <p className={`${mono} text-[10px] uppercase tracking-[0.2em] text-red-400`}>without onleash</p>
+              <p className="mt-3 text-sm text-[color:var(--ink-2)] leading-relaxed">
+                Agent receives a fake 402 challenge from an attacker.<br />
+                Agent signs payment to attacker address.<br />
+                <span className="text-red-400 font-bold">Funds gone. Agent never knew.</span>
+              </p>
+            </div>
+            {/* with */}
+            <div className="bg-[color:var(--paper)] p-6">
+              <p className={`${mono} text-[10px] uppercase tracking-[0.2em] text-[color:var(--brand)]`}>with onleash</p>
+              <p className="mt-3 text-sm text-[color:var(--ink-2)] leading-relaxed">
+                Agent signs the same payment to the attacker address.<br />
+                Onleash hook runs on-chain. Destination not in allowlist.<br />
+                <span className="text-[color:var(--brand)] font-bold">DestinationNotAllowed (6001). Funds preserved.</span>
+              </p>
+            </div>
+          </div>
+          <div className="mt-8 flex flex-wrap gap-4">
+            <a href="https://github.com/sendaifun/solana-agent-kit/pull/565"
+              target="_blank" rel="noreferrer"
+              className={`${mono} inline-flex items-center gap-2 border border-[color:var(--brand)] px-4 py-2 text-xs uppercase tracking-[0.16em] text-[color:var(--brand)] hover:bg-[color:var(--brand)] hover:text-black transition-colors`}>
+              view PR — solana-agent-kit #565 →
+            </a>
+            <a href="https://pay.sh" target="_blank" rel="noreferrer"
+              className={`${mono} inline-flex items-center gap-2 border border-[color:var(--line-strong)] px-4 py-2 text-xs uppercase tracking-[0.16em] text-[color:var(--ink-2)] hover:text-[color:var(--ink)] transition-colors`}>
+              pay.sh →
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* ── WAITLIST ─────────────────────────────────────────────── */}
       <section id="waitlist" className="border-b border-[color:var(--line)] px-6 py-24 bg-[color:var(--paper-2)]">
         <div className="mx-auto max-w-5xl">

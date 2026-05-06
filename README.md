@@ -59,6 +59,45 @@ Onleash moves the policy into the **token itself**, via Solana Token-2022 transf
 
 ---
 
+## pay.sh integration
+
+[pay.sh](https://pay.sh) is an HTTP 402 / x402 payment layer for AI agents — it lets agents pay for API calls (RPC, inference, data) autonomously, with no signup. The agent detects a `402 Payment Required` challenge, authorises a payment from its wallet, retries. Powerful, but it creates a new attack surface:
+
+> A jailbroken agent receives a fake 402 challenge from an attacker. The agent signs a payment to the attacker's address instead of the real API provider. Funds gone.
+
+Onleash closes this gap. The agent's payment tokens are an Onleash-protected Token-2022 mint. Only approved pay.sh provider addresses are on the allowlist. The chain blocks any payment to an unapproved destination — atomically, before funds move, regardless of what the agent signed.
+
+```ts
+import { SolanaAgentKit } from "solana-agent-kit";
+import OnleashPlugin from "@solana-agent-kit/plugin-onleash";
+
+const agent = new SolanaAgentKit(wallet, rpcUrl, config).use(OnleashPlugin);
+
+// Agent receives a pay.sh 402 challenge — pays the provider safely
+await agent.actions.ONLEASH_PAY_SH_PAYMENT({
+  mint: protectedMint,
+  source: agentTokenAccount,
+  providerPaymentAddress: payShProviderATA, // must be in allowlist
+  amount: "1000",                           // raw units
+  decimals: 6,
+  apiEndpoint: "https://api.quicknode.com/rpc",
+});
+
+// If a jailbroken agent tries to redirect to an attacker:
+// → DestinationNotAllowed (6001) — chain refused, funds never moved
+```
+
+The `ONLEASH_PAY_SH_PAYMENT` action is part of `@solana-agent-kit/plugin-onleash`. Install without npm:
+
+```bash
+# in your solana-agent-kit project
+pnpm add github:amalia020/onleash#main
+```
+
+Draft integration PR: [sendaifun/solana-agent-kit#565](https://github.com/sendaifun/solana-agent-kit/pull/565)
+
+---
+
 ## Architecture
 
 ```
@@ -102,7 +141,11 @@ onleash/
 ## Quickstart (consume the SDK)
 
 ```bash
+# Standalone SDK
 pnpm add @onleash/sdk @solana/web3.js @solana/spl-token
+
+# solana-agent-kit plugin (no npm account needed)
+pnpm add github:amalia020/onleash#main
 ```
 
 ```ts
@@ -132,7 +175,7 @@ await client.transfer({ mint, source, destination: approvedPoolATA, owner: payer
 const policy = await client.fetchPolicy(mint);
 ```
 
-`createOnleashActions(client)` returns four Zod-schema'd actions ready to drop into solana-agent-kit, Vercel AI SDK, or LangChain tool arrays.
+`createOnleashActions(client)` returns five Zod-schema'd actions ready to drop into solana-agent-kit, Vercel AI SDK, or LangChain tool arrays — including `ONLEASH_PAY_SH_PAYMENT` for pay.sh x402 protected payments.
 
 ---
 
@@ -238,6 +281,7 @@ Roadmap will pair the hook with companion guards (permanent-delegate, policy-gat
 - [x] Devnet deploy + 10/10 tests passing
 - [ ] Mainnet deploy
 - [x] Public live-attack demo site (deployed: https://onleash.vercel.app)
+- [x] pay.sh x402 integration — `ONLEASH_PAY_SH_PAYMENT` action protects agent API payments
 - [ ] Companion guards (permanent-delegate, burn-policy, close-guard)
 - [x] solana-agent-kit upstream PR (draft open: [sendaifun/solana-agent-kit#565](https://github.com/sendaifun/solana-agent-kit/pull/565))
 - [ ] DEX compatibility matrix (Orca Whirlpools: **compatible** via TokenBadge — [confirmed](https://dev.orca.so/Architecture%20Overview/TokenExtensions%20Support/); Meteora DLMM next)
