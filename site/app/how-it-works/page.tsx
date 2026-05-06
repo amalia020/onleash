@@ -17,7 +17,7 @@ export default function HowItWorks() {
           <p className="mt-6 max-w-2xl text-lg text-[color:var(--ink-2)]">
             Solana&apos;s Token-2022 transfer-hook extension lets a mint specify a program
             that runs on every transfer — including CPIs from DEXes and vaults.
-            Onleash is that program. Three checks; any failure reverts the entire atomic transaction.
+            Onleash is that program. Six checks run atomically — any failure reverts the entire transaction.
           </p>
         </div>
       </section>
@@ -50,12 +50,12 @@ export default function HowItWorks() {
       {/* ── 3 CHECKS ─────────────────────────────────────────────── */}
       <section className="border-b border-[color:var(--line)] px-6 py-20 bg-[color:var(--paper-2)]">
         <div className="mx-auto max-w-5xl">
-          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>the three checks</p>
-          <h2 className={`${display} mt-4 text-2xl font-black sm:text-3xl`}>All three must pass. Any failure reverts.</h2>
-          <div className="mt-10 grid gap-0 border-2 border-[color:var(--line)] sm:grid-cols-3">
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>the six checks</p>
+          <h2 className={`${display} mt-4 text-2xl font-black sm:text-3xl`}>All six must pass. Any failure reverts.</h2>
+          <div className="mt-10 grid gap-0 border-2 border-[color:var(--line)] sm:grid-cols-2 lg:grid-cols-3">
             {CHECKS.map((c, i) => (
               <article key={c.title}
-                className={`bg-[color:var(--paper)] p-6 flex flex-col gap-3 ${i < 2 ? "sm:border-r-2 sm:border-[color:var(--line)]" : ""} ${i > 0 ? "border-t-2 border-[color:var(--line)] sm:border-t-0" : ""}`}>
+                className={`bg-[color:var(--paper)] p-6 flex flex-col gap-3 ${i % 3 !== 2 ? "lg:border-r-2 lg:border-[color:var(--line)]" : ""} ${i % 2 !== 0 ? "sm:border-l-2 sm:border-[color:var(--line)]" : ""} ${i > 0 ? "border-t-2 border-[color:var(--line)] sm:border-t-0" : ""}`}>
                 <div className="flex items-center gap-3">
                   <span className="flex h-8 w-8 items-center justify-center bg-[color:var(--brand)] text-white text-sm font-bold flex-shrink-0">{i + 1}</span>
                   <div className={`${display} font-black text-base`}>{c.title}</div>
@@ -168,7 +168,7 @@ export default function HowItWorks() {
 const FLOW = [
   { label: "Agent signs tx",        desc: "AI agent constructs a Token-2022 transfer and signs with its keypair." },
   { label: "Token-2022 calls hook", desc: "Solana's Token-2022 program invokes the Onleash hook on every transfer." },
-  { label: "3 checks run",          desc: "Allowlist · per-tx cap · 24h daily cap. All three must pass atomically." },
+  { label: "6 checks run",          desc: "Allowlist · per-tx cap · daily cap · pause · cooldown · count. All six must pass atomically." },
   { label: "Approve or revert",     desc: "Pass → transfer clears. Fail → entire transaction reverts. No partials." },
 ];
 
@@ -176,6 +176,9 @@ const CHECKS = [
   { title: "Destination allowlist", desc: "Up to 8 approved destination token accounts per mint. Any other destination causes an immediate revert. The agent cannot route funds anywhere else.", code: 6001, name: "DestinationNotAllowed" },
   { title: "Per-tx maximum",        desc: "Hard ceiling on a single transfer amount. Prevents a single oversized exfiltration even if the daily cap has headroom.", code: 6002, name: "ExceedsPerTxMax" },
   { title: "24h rolling cap",       desc: "Cumulative spend limit per rolling 24h window. Auto-resets on the first transfer after the window expires — no admin action needed.", code: 6003, name: "ExceedsDailyCap" },
+  { title: "Emergency pause",       desc: "Authority sets paused=true and all transfers halt immediately. One on-chain flag, effective on the next block. No multisig, no off-chain coordination.", code: 6007, name: "PolicyPaused" },
+  { title: "Transfer cooldown",     desc: "Minimum seconds between transfers. Throttles rapid-fire drain attempts — even if each is under the per-tx cap and daily limit.", code: 6008, name: "CooldownActive" },
+  { title: "Daily count limit",     desc: "Max number of transfers per 24h window. Blocks micro-drain patterns where many small transfers individually pass value caps but collectively exfiltrate the wallet.", code: 6009, name: "ExceedsTransferCount" },
 ];
 
 const WHY_SOLANA = [

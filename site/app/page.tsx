@@ -93,7 +93,7 @@ export default function Home() {
             that runs on every transfer — including CPIs from DEXes and vaults.
             Onleash is that program.
           </p>
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {SOLUTION_PILLARS.map((p) => (
               <div key={p.title} className="border-2 border-[color:var(--line)] bg-[color:var(--paper)] p-6">
                 <div className="flex h-8 w-8 items-center justify-center bg-[color:var(--brand)] text-white text-sm font-bold mb-4">
@@ -310,7 +310,7 @@ function ChainRow({ label, value, href }: { label: string; value: string; href: 
 const STATS = [
   { value: "$653K",  label: "Drained in documented attacks" },
   { value: "$77M",   label: "Agent wallet TVL today" },
-  { value: "10/10",  label: "Tests passing on devnet" },
+  { value: "13/13",  label: "Tests passing on devnet" },
   { value: "PR #565", label: "solana-agent-kit plugin open" },
 ];
 
@@ -322,7 +322,10 @@ const INCIDENTS = [
 ];
 
 const SOLUTION_PILLARS = [
-  { num: "1", title: "Allowlist",     desc: "Up to 8 approved destination accounts. Anything else, the chain rejects — error 6001." },
-  { num: "2", title: "Per-tx cap",    desc: "Hard ceiling on a single transfer. No oversized exfiltration — error 6002." },
-  { num: "3", title: "Daily cap",     desc: "24h rolling window. Self-resets on the next transfer after the window expires — error 6003." },
+  { num: "1", title: "Allowlist",       desc: "Up to 8 approved destination accounts. Anything else, the chain rejects — error 6001." },
+  { num: "2", title: "Per-tx cap",      desc: "Hard ceiling on a single transfer. No oversized exfiltration — error 6002." },
+  { num: "3", title: "Daily cap",       desc: "24h rolling window. Self-resets on the next transfer after the window expires — error 6003." },
+  { num: "4", title: "Emergency pause", desc: "Authority can halt all transfers instantly. One flag, on-chain, effective on the next block — error 6007." },
+  { num: "5", title: "Cooldown",        desc: "Minimum interval between transfers. Throttles rapid-fire drains — error 6008." },
+  { num: "6", title: "Transfer count",  desc: "Daily limit on number of transfers, not just value. Blocks high-frequency micro-drain patterns — error 6009." },
 ];
