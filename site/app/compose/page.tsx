@@ -18,8 +18,8 @@ interface PolicyConfig {
 }
 
 const DEFAULT: PolicyConfig = {
-  perTxMax: 10,
-  dailyCap: 50,
+  perTxMax: 100,
+  dailyCap: 1000,
   allowlist: [],
   paused: false,
   cooldownSecs: 0,
@@ -43,8 +43,8 @@ function generateCode(cfg: PolicyConfig): string {
     ``,
     `const { mint } = await client.deployProtectedMint({`,
     `  decimals:  ${cfg.decimals},`,
-    `  perTxMax:  ${toRaw(cfg.perTxMax, cfg.decimals)},   // ${cfg.perTxMax} tokens max per transfer`,
-    `  dailyCap:  ${toRaw(cfg.dailyCap, cfg.decimals)},   // ${cfg.dailyCap} tokens max per 24h`,
+    ...(cfg.perTxMax > 0 ? [`  perTxMax:  ${toRaw(cfg.perTxMax, cfg.decimals)},   // ${cfg.perTxMax.toLocaleString()} tokens max per transfer`] : [`  // perTxMax: not enforced`]),
+    ...(cfg.dailyCap > 0 ? [`  dailyCap:  ${toRaw(cfg.dailyCap, cfg.decimals)},   // ${cfg.dailyCap.toLocaleString()} tokens max per 24h`] : [`  // dailyCap: not enforced`]),
     `  allowlist: [${cfg.allowlist.map(a => `new PublicKey("${a}")`).join(", ") || "/* add approved ATAs */"}],`,
   ];
   if (cfg.cooldownSecs > 0) lines.push(`  cooldownSecs: ${cfg.cooldownSecs},              // ${cfg.cooldownSecs}s between transfers`);
@@ -141,22 +141,31 @@ export default function Compose() {
               <h2 className={`${display} text-xl font-black mb-2`}>How much can the agent spend per transfer?</h2>
               <p className="text-sm text-[color:var(--ink-2)] mb-6">This is the single hardest limit. No single transfer can exceed it — no matter what the agent signs.</p>
               <div className="flex flex-col gap-4">
-                {[1, 5, 10, 25, 50, 100].map(v => (
+                {/* No limit option */}
+                <label className={`flex items-center gap-3 border-2 p-4 cursor-pointer transition-colors ${cfg.perTxMax === 0 ? "border-[color:var(--brand)] bg-[color:var(--paper-2)]" : "border-[color:var(--line)] hover:border-[color:var(--line-strong)]"}`}>
+                  <input type="radio" name="perTxMax" value={0} checked={cfg.perTxMax === 0} onChange={() => setCfg(c => ({ ...c, perTxMax: 0 }))} className="accent-[color:var(--brand)]" />
+                  <div>
+                    <div className="font-bold text-sm">No limit</div>
+                    <div className="text-xs text-[color:var(--ink-2)] mt-0.5">Per-tx check disabled — only daily cap and allowlist apply</div>
+                  </div>
+                </label>
+                {[10, 50, 100, 500, 1_000, 10_000, 100_000].map(v => (
                   <label key={v} className={`flex items-center gap-3 border-2 p-4 cursor-pointer transition-colors ${cfg.perTxMax === v ? "border-[color:var(--brand)] bg-[color:var(--paper-2)]" : "border-[color:var(--line)] hover:border-[color:var(--line-strong)]"}`}>
                     <input type="radio" name="perTxMax" value={v} checked={cfg.perTxMax === v} onChange={() => setCfg(c => ({ ...c, perTxMax: v }))} className="accent-[color:var(--brand)]" />
                     <div>
-                      <div className="font-bold text-sm">{v} tokens per transfer</div>
+                      <div className="font-bold text-sm">{v.toLocaleString()} tokens per transfer</div>
                       <div className="text-xs text-[color:var(--ink-2)] mt-0.5">{toRaw(v, cfg.decimals)} raw units · error 6002 on breach</div>
                     </div>
                   </label>
                 ))}
-                <label className={`flex items-center gap-3 border-2 p-4 cursor-pointer transition-colors ${![1,5,10,25,50,100].includes(cfg.perTxMax) ? "border-[color:var(--brand)] bg-[color:var(--paper-2)]" : "border-[color:var(--line)] hover:border-[color:var(--line-strong)]"}`}>
-                  <input type="radio" name="perTxMax" checked={![1,5,10,25,50,100].includes(cfg.perTxMax)} onChange={() => {}} className="accent-[color:var(--brand)]" />
+                <label className={`flex items-center gap-3 border-2 p-4 cursor-pointer transition-colors ${cfg.perTxMax > 0 && ![10,50,100,500,1_000,10_000,100_000].includes(cfg.perTxMax) ? "border-[color:var(--brand)] bg-[color:var(--paper-2)]" : "border-[color:var(--line)] hover:border-[color:var(--line-strong)]"}`}>
+                  <input type="radio" name="perTxMax" checked={cfg.perTxMax > 0 && ![10,50,100,500,1_000,10_000,100_000].includes(cfg.perTxMax)} onChange={() => {}} className="accent-[color:var(--brand)]" />
                   <div className="flex items-center gap-2 flex-1">
                     <span className="text-sm font-bold">Custom:</span>
-                    <input type="number" min={1} value={cfg.perTxMax}
+                    <input type="number" min={1} value={cfg.perTxMax || ""}
+                      placeholder="e.g. 250"
                       onChange={e => setCfg(c => ({ ...c, perTxMax: Math.max(1, Number(e.target.value)) }))}
-                      className={`${mono} w-24 border border-[color:var(--line-strong)] bg-transparent px-2 py-1 text-sm outline-none focus:border-[color:var(--brand)]`} />
+                      className={`${mono} w-32 border border-[color:var(--line-strong)] bg-transparent px-2 py-1 text-sm outline-none focus:border-[color:var(--brand)]`} />
                     <span className="text-sm text-[color:var(--ink-2)]">tokens</span>
                   </div>
                 </label>
@@ -170,15 +179,35 @@ export default function Compose() {
               <h2 className={`${display} text-xl font-black mb-2`}>How much can the agent spend per day?</h2>
               <p className="text-sm text-[color:var(--ink-2)] mb-6">24h rolling window. Resets automatically — no admin action needed.</p>
               <div className="flex flex-col gap-3">
-                {[10, 25, 50, 100, 250, 500].map(v => (
+                <label className={`flex items-center gap-3 border-2 p-4 cursor-pointer transition-colors ${cfg.dailyCap === 0 ? "border-[color:var(--brand)] bg-[color:var(--paper-2)]" : "border-[color:var(--line)] hover:border-[color:var(--line-strong)]"}`}>
+                  <input type="radio" name="dailyCap" value={0} checked={cfg.dailyCap === 0} onChange={() => setCfg(c => ({ ...c, dailyCap: 0 }))} className="accent-[color:var(--brand)]" />
+                  <div>
+                    <div className="font-bold text-sm">No daily limit</div>
+                    <div className="text-xs text-[color:var(--ink-2)] mt-0.5">Daily cap disabled — only per-tx max and allowlist apply</div>
+                  </div>
+                </label>
+                {[100, 500, 1_000, 5_000, 10_000, 100_000, 1_000_000].map(v => (
                   <label key={v} className={`flex items-center gap-3 border-2 p-4 cursor-pointer transition-colors ${cfg.dailyCap === v ? "border-[color:var(--brand)] bg-[color:var(--paper-2)]" : "border-[color:var(--line)] hover:border-[color:var(--line-strong)]"}`}>
                     <input type="radio" name="dailyCap" value={v} checked={cfg.dailyCap === v} onChange={() => setCfg(c => ({ ...c, dailyCap: v }))} className="accent-[color:var(--brand)]" />
                     <div>
-                      <div className="font-bold text-sm">{v} tokens per 24h</div>
-                      <div className="text-xs text-[color:var(--ink-2)] mt-0.5">{Math.floor(v / cfg.perTxMax)} max transfers at current per-tx limit · error 6003</div>
+                      <div className="font-bold text-sm">{v.toLocaleString()} tokens per 24h</div>
+                      <div className="text-xs text-[color:var(--ink-2)] mt-0.5">
+                        {cfg.perTxMax > 0 ? `${Math.floor(v / cfg.perTxMax)} max transfers at current per-tx limit · ` : ""}error 6003
+                      </div>
                     </div>
                   </label>
                 ))}
+                <label className={`flex items-center gap-3 border-2 p-4 cursor-pointer transition-colors ${cfg.dailyCap > 0 && ![100,500,1_000,5_000,10_000,100_000,1_000_000].includes(cfg.dailyCap) ? "border-[color:var(--brand)] bg-[color:var(--paper-2)]" : "border-[color:var(--line)] hover:border-[color:var(--line-strong)]"}`}>
+                  <input type="radio" name="dailyCap" checked={cfg.dailyCap > 0 && ![100,500,1_000,5_000,10_000,100_000,1_000_000].includes(cfg.dailyCap)} onChange={() => {}} className="accent-[color:var(--brand)]" />
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className="text-sm font-bold">Custom:</span>
+                    <input type="number" min={1} value={cfg.dailyCap || ""}
+                      placeholder="e.g. 2500"
+                      onChange={e => setCfg(c => ({ ...c, dailyCap: Math.max(1, Number(e.target.value)) }))}
+                      className={`${mono} w-32 border border-[color:var(--line-strong)] bg-transparent px-2 py-1 text-sm outline-none focus:border-[color:var(--brand)]`} />
+                    <span className="text-sm text-[color:var(--ink-2)]">tokens / 24h</span>
+                  </div>
+                </label>
               </div>
             </div>
           )}
@@ -263,8 +292,8 @@ export default function Compose() {
               <h2 className={`${display} text-xl font-black mb-4`}>Your policy</h2>
               <div className="grid gap-2 mb-6">
                 {[
-                  ["Per-tx max", `${cfg.perTxMax} tokens`, "6002"],
-                  ["Daily cap", `${cfg.dailyCap} tokens / 24h`, "6003"],
+                  ["Per-tx max", cfg.perTxMax === 0 ? "not enforced" : `${cfg.perTxMax.toLocaleString()} tokens`, "6002"],
+                  ["Daily cap", cfg.dailyCap === 0 ? "not enforced" : `${cfg.dailyCap.toLocaleString()} tokens / 24h`, "6003"],
                   ["Allowlist", cfg.allowlist.length === 0 ? "none (all transfers will fail)" : `${cfg.allowlist.length} address${cfg.allowlist.length !== 1 ? "es" : ""}`, "6001"],
                   ["Cooldown", cfg.cooldownSecs > 0 ? `${cfg.cooldownSecs}s between transfers` : "disabled", "6008"],
                   ["Max transfers/day", cfg.maxTransfersPerDay > 0 ? String(cfg.maxTransfersPerDay) : "unlimited", "6009"],
