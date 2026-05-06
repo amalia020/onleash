@@ -272,22 +272,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── GAP PROOF ───────────────────────────────────────────── */}
-      <section className="border-b border-[color:var(--line)] px-6 py-20 bg-[color:var(--paper-2)]">
-        <div className="mx-auto max-w-5xl text-center">
-          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>
-            Colosseum gap analysis · 5,428 projects
-          </p>
-          <div className={`${display} mt-6 text-7xl font-black sm:text-9xl text-[color:var(--brand)]`}>0.052</div>
-          <p className={`${mono} mt-2 text-xs uppercase tracking-[0.16em] text-[color:var(--ink-2)]`}>similarity score</p>
-          <p className="mt-6 max-w-xl mx-auto text-base text-[color:var(--ink-2)]">
-            Nobody combines policy + Token-2022 transfer hooks + agent wallets. The category is architecturally unoccupied.
-          </p>
-          <p className={`${display} mt-6 text-xl font-black`}>
-            Every other solution trusts the agent. We trust the token.
-          </p>
-        </div>
-      </section>
 
       {/* ── ON-CHAIN PROOF ──────────────────────────────────────── */}
       <section className="border-b border-[color:var(--line)] px-6 py-20">
