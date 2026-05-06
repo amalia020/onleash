@@ -1,396 +1,442 @@
-"use client";
-
-import { useState } from "react";
-
-interface AttackResult {
-  ok: boolean;
-  rateLimited?: boolean;
-  retryInMs?: number;
-  message?: string;
-  network?: string;
-  signature?: string;
-  explorerUrl?: string;
-  reverted?: boolean;
-  error?: { code: number; name: string | null; rawLine: string | null } | null;
-  amount?: string;
-  source?: string;
-  destination?: string;
-  mint?: string;
-  programId?: string;
-  logTail?: string[];
-}
+import Link from "next/link";
 
 const PROGRAM_ID = "7vJ2fa6dr3Tnx8whNAepUMmpytAnEZxcASMyH2jAuG7v";
 const SAMPLE_MINT = "2KkYRVS2cBnneryveAYxH5hGfnNhdFruXAc4NjeAekcZ";
 
-export default function Home() {
-  const [pending, setPending] = useState(false);
-  const [result, setResult] = useState<AttackResult | null>(null);
+const mono = "font-[family-name:var(--font-mono-family)]";
+const display = "font-[family-name:var(--font-display-family)]";
 
-  async function runAttack() {
-    setPending(true);
-    setResult(null);
-    try {
-      const res = await fetch("/api/run-attack", { method: "POST" });
-      const json = (await res.json()) as AttackResult;
-      setResult(json);
-    } catch (e: unknown) {
-      setResult({ ok: false, message: e instanceof Error ? e.message : String(e) });
-    } finally {
-      setPending(false);
-    }
-  }
-
+export default function Landing() {
   return (
-    <main className="min-h-screen bg-[#0A0A0A] text-[#FAFAF7] selection:bg-[#FF6B35] selection:text-black">
-      {/* ─── HERO ─────────────────────────────────────────────────── */}
-      <section className="border-b border-white/10 px-6 pt-16 pb-20 sm:pt-24 sm:pb-32">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-4 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-white/50">
-            <span className="inline-block h-1 w-6 bg-[#FF6B35]" />
-            DEVNET · LIVE
-          </div>
-          <h1 className="font-black tracking-tight text-5xl leading-[1.05] sm:text-7xl">
-            Onleash
-          </h1>
-          <div className="mt-3 h-1 w-24 bg-[#FF6B35]" />
-          <p className="mt-8 max-w-2xl text-2xl font-bold leading-tight sm:text-4xl">
-            Agents unleashed.{" "}
-            <span className="text-[#FF6B35]">Wallets on leash.</span>
-          </p>
-          <p className="mt-6 max-w-2xl text-base text-white/70 sm:text-lg">
-            Token-2022 transfer hook for AI agent wallets. Spending policy
-            enforced at the mint layer, not in middleware. A jailbroken agent
-            can sign anything — the chain refuses to clear it.
-          </p>
+    <main style={{ background: "var(--paper)", color: "var(--ink)" }}>
 
-          {/* CTA */}
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
-            <button
-              type="button"
-              onClick={runAttack}
-              disabled={pending}
-              className="group inline-flex items-center justify-center gap-3 border-2 border-[#FF6B35] bg-[#FF6B35] px-7 py-4 font-mono text-sm font-bold uppercase tracking-[0.18em] text-black transition-all hover:bg-transparent hover:text-[#FF6B35] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {pending ? (
-                <>
-                  <span className="inline-block h-3 w-3 animate-pulse rounded-full bg-current" />
-                  submitting…
-                </>
-              ) : (
-                <>Run attack on devnet →</>
-              )}
-            </button>
+      {/* ── NAV ─────────────────────────────────────────────────── */}
+      <nav className="border-b border-[color:var(--line)] px-6 py-4">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className={`${display} text-lg font-black`}>onleash</span>
+            <span className="inline-block h-[3px] w-5 bg-[color:var(--brand)]" />
+          </div>
+          <div className="flex items-center gap-6">
             <a
               href="https://github.com/amalia020/onleash"
               target="_blank"
               rel="noreferrer"
-              className="font-mono text-sm uppercase tracking-[0.18em] text-white/60 underline-offset-4 hover:text-[#FAFAF7] hover:underline"
+              className={`${mono} text-xs uppercase tracking-[0.18em] text-[color:var(--ink-2)] hover:text-[color:var(--ink)]`}
             >
-              github
+              GitHub
+            </a>
+            <Link
+              href="/demo"
+              className={`${mono} inline-flex items-center gap-2 bg-[color:var(--brand)] px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-white hover:bg-[color:var(--brand-2)]`}
+            >
+              Try demo →
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* ── HERO ────────────────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 pt-20 pb-28 sm:pt-28 sm:pb-36">
+        <div className="mx-auto max-w-5xl">
+          <div className={`${mono} mb-5 flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)] animate-fade-up`}>
+            <span className="inline-block h-[3px] w-6 bg-[color:var(--brand)]" />
+            Token-2022 · Solana · Open source
+          </div>
+          <h1 className={`${display} animate-fade-up-delay-1 max-w-4xl font-black tracking-tight text-5xl leading-[1.02] sm:text-7xl lg:text-8xl`}>
+            Every AI agent with a wallet is one prompt away from getting rugged.
+          </h1>
+          <div className="mt-4 h-1 w-32 bg-[color:var(--brand)] animate-fade-up-delay-2" />
+          <p className="mt-8 max-w-2xl text-lg leading-relaxed text-[color:var(--ink-2)] animate-fade-up-delay-2">
+            Onleash puts spending policy <em>inside the token itself</em> via Token-2022 transfer hooks — so a jailbroken AI agent cannot exit the mint regardless of which key it signs with or which program it calls.
+          </p>
+          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center animate-fade-up-delay-3">
+            <Link
+              href="/demo"
+              className={`${mono} inline-flex items-center justify-center gap-3 border-2 border-[color:var(--brand)] bg-[color:var(--brand)] px-8 py-4 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-[color:var(--brand-2)] hover:border-[color:var(--brand-2)]`}
+            >
+              Run attack on devnet →
+            </Link>
+            <a
+              href="https://github.com/amalia020/onleash"
+              target="_blank"
+              rel="noreferrer"
+              className={`${mono} text-sm uppercase tracking-[0.18em] text-[color:var(--ink-2)] underline-offset-4 hover:text-[color:var(--ink)] hover:underline`}
+            >
+              Star on GitHub
             </a>
           </div>
-
-          {/* Result panel */}
-          {result && <ResultPanel result={result} />}
         </div>
       </section>
 
-      {/* ─── THE PROBLEM ─────────────────────────────────────────── */}
-      <section className="border-b border-white/10 px-6 py-20">
+      {/* ── PROOF: REAL INCIDENTS ───────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-20">
         <div className="mx-auto max-w-5xl">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/50">
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>
             the problem
           </p>
-          <h2 className="mt-4 max-w-3xl text-3xl font-black sm:text-5xl">
+          <h2 className={`${display} mt-4 max-w-3xl text-3xl font-black sm:text-5xl`}>
             AI agents have wallets. They&apos;re getting drained.
           </h2>
-          <div className="mt-12 grid gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid gap-px bg-[color:var(--line)] sm:grid-cols-2 lg:grid-cols-4">
             {INCIDENTS.map((i) => (
-              <article
-                key={i.title}
-                className="bg-[#0A0A0A] p-6 transition-colors hover:bg-white/[0.03]"
-              >
-                <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#FF6B35]">
-                  {i.date}
-                </div>
-                <div className="mt-2 text-3xl font-black">{i.amount}</div>
+              <article key={i.title} className="bg-[color:var(--paper)] p-6 hover:bg-[color:var(--paper-2)] transition-colors">
+                <div className={`${mono} text-[10px] uppercase tracking-[0.2em] text-[color:var(--brand)]`}>{i.date}</div>
+                <div className={`${display} mt-2 text-3xl font-black`}>{i.amount}</div>
                 <div className="mt-3 text-sm font-bold">{i.title}</div>
-                <p className="mt-2 text-xs leading-relaxed text-white/60">
-                  {i.summary}
-                </p>
+                <p className="mt-2 text-xs leading-relaxed text-[color:var(--ink-2)]">{i.summary}</p>
               </article>
             ))}
           </div>
+          <p className="mt-6 text-sm text-[color:var(--ink-2)]">
+            Every existing solution trusts the agent. Revocable custody, Squads multisig, hand-rolled middleware — all operate at the{" "}
+            <span className="font-semibold text-[color:var(--ink)]">signer layer</span>. A jailbroken agent can bypass them.{" "}
+            <span className="font-semibold text-[color:var(--ink)]">Onleash operates at the asset layer.</span>
+          </p>
         </div>
       </section>
 
-      {/* ─── HOW IT WORKS ────────────────────────────────────────── */}
-      <section className="border-b border-white/10 px-6 py-20">
+      {/* ── MECHANISM ───────────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-20">
         <div className="mx-auto max-w-5xl">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/50">
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>
             how it works
           </p>
-          <h2 className="mt-4 max-w-3xl text-3xl font-black sm:text-5xl">
+          <h2 className={`${display} mt-4 max-w-3xl text-3xl font-black sm:text-5xl`}>
             Policy lives in the token, not the wallet.
           </h2>
-          <p className="mt-6 max-w-2xl text-base text-white/70 sm:text-lg">
-            Solana&apos;s Token-2022 transfer-hook extension lets a mint specify
-            a program that runs on every transfer. Onleash is that program.
-            Three checks; any failure reverts the entire atomic transaction.
+          <p className="mt-6 max-w-2xl text-base text-[color:var(--ink-2)] sm:text-lg">
+            Solana&apos;s Token-2022 transfer-hook extension lets a mint specify a program that runs on every transfer. Onleash is that program. Three checks; any failure reverts the entire atomic transaction.
           </p>
 
-          <div className="mt-12 grid gap-px bg-white/10 lg:grid-cols-3">
-            {CHECKS.map((c, i) => (
-              <article key={c.title} className="bg-[#0A0A0A] p-6">
-                <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#FF6B35]">
-                  Check {i + 1}
+          {/* flow diagram */}
+          <div className="mt-12 flex flex-col items-start gap-0 sm:flex-row sm:items-stretch">
+            {FLOW.map((step, i) => (
+              <div key={step.label} className="flex sm:flex-col sm:flex-1 items-center sm:items-start">
+                <div className="flex sm:flex-col items-center sm:items-start gap-0 w-full">
+                  <div className="border border-[color:var(--line)] bg-[color:var(--paper-2)] p-5 sm:w-full">
+                    <div className={`${mono} text-[10px] uppercase tracking-[0.16em] text-[color:var(--brand)]`}>Step {i + 1}</div>
+                    <div className="mt-2 font-bold text-sm">{step.label}</div>
+                    <p className="mt-1 text-xs text-[color:var(--ink-2)] leading-relaxed">{step.desc}</p>
+                  </div>
+                  {i < FLOW.length - 1 && (
+                    <div className={`${mono} px-3 py-2 text-[color:var(--brand)] text-lg font-bold hidden sm:block`}>→</div>
+                  )}
                 </div>
+              </div>
+            ))}
+          </div>
+
+          {/* 3 checks */}
+          <div className="mt-12 grid gap-px bg-[color:var(--line)] lg:grid-cols-3">
+            {CHECKS.map((c, i) => (
+              <article key={c.title} className="bg-[color:var(--paper)] p-6">
+                <div className={`${mono} text-[10px] uppercase tracking-[0.2em] text-[color:var(--brand)]`}>Check {i + 1}</div>
                 <div className="mt-3 text-base font-bold">{c.title}</div>
-                <p className="mt-2 text-sm leading-relaxed text-white/60">
-                  {c.summary}
-                </p>
-                <div className="mt-4 font-mono text-[11px] text-white/40">
-                  Error code <span className="text-[#FF6B35]">{c.code}</span>
+                <p className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{c.summary}</p>
+                <div className={`${mono} mt-4 text-[11px] text-[color:var(--ink-3)]`}>
+                  Error code <span className="text-[color:var(--brand)]">{c.code}</span>
                 </div>
               </article>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* Code snippet */}
-          <div className="mt-16">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/50">
-              integration · 5 lines
+      {/* ── LIVE DEMO CTA ───────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-20 bg-[color:var(--paper-2)]">
+        <div className="mx-auto max-w-5xl">
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>
+            live · devnet
+          </p>
+          <h2 className={`${display} mt-4 max-w-2xl text-3xl font-black sm:text-5xl`}>
+            Watch the chain reject an attack in real time.
+          </h2>
+          <p className="mt-6 max-w-xl text-base text-[color:var(--ink-2)]">
+            We submit a real Token-2022 transfer to a destination NOT on the allowlist. Solana&apos;s Token-2022 program runs the Onleash hook on-chain. The hook reverts the transaction atomically. Funds preserved.
+          </p>
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <Link
+              href="/demo"
+              className={`${mono} inline-flex items-center gap-3 border-2 border-[color:var(--brand)] bg-[color:var(--brand)] px-8 py-4 text-sm font-bold uppercase tracking-[0.18em] text-white hover:bg-[color:var(--brand-2)] hover:border-[color:var(--brand-2)]`}
+            >
+              Run attack on devnet →
+            </Link>
+            <a
+              href={`https://explorer.solana.com/address/${PROGRAM_ID}?cluster=devnet`}
+              target="_blank"
+              rel="noreferrer"
+              className={`${mono} inline-flex items-center gap-2 border border-[color:var(--line-strong)] px-4 py-4 text-xs uppercase tracking-[0.18em] text-[color:var(--ink-2)] hover:border-[color:var(--brand-line)] hover:text-[color:var(--brand)]`}
+            >
+              View program on explorer →
+            </a>
+          </div>
+          {/* error card preview */}
+          <div className="mt-12 max-w-2xl border-2 border-[color:var(--brand)] bg-white p-6">
+            <div className={`${mono} text-[10px] uppercase tracking-[0.2em] text-[color:var(--brand)]`}>
+              ✓ transaction rejected on chain · attack blocked
+            </div>
+            <div className={`${display} mt-3 text-2xl font-black`}>
+              DestinationNotAllowed <span className="text-[color:var(--brand)]">(6001)</span>
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-[color:var(--ink-2)]">
+              We submitted a real Token-2022 transfer of <code className={`${mono} text-[color:var(--ink)]`}>1 token</code> to a destination NOT on the policy allowlist. The hook rejected the transfer atomically — funds preserved.
             </p>
-            <pre className="mt-4 overflow-x-auto border-2 border-white/15 bg-black p-6 text-xs leading-relaxed sm:text-sm">
-              <code className="font-mono">
-                <span className="text-white/40">// pnpm add @onleash/sdk</span>
-                {"\n"}
-                <span className="text-[#FF6B35]">import</span> {"{ "}OnleashClient{" }"}{" "}
-                <span className="text-[#FF6B35]">from</span>{" "}
-                <span className="text-emerald-400">&quot;@onleash/sdk&quot;</span>;
-                {"\n"}
-                {"\n"}
-                <span className="text-[#FF6B35]">const</span> client ={" "}
-                <span className="text-[#FF6B35]">new</span> OnleashClient(connection,
-                wallet);{"\n"}
-                <span className="text-[#FF6B35]">await</span>{" "}
-                client.deployProtectedMint({"{"}
-                {"\n  "}decimals: <span className="text-amber-300">6</span>,{"\n  "}
-                perTxMax: <span className="text-amber-300">10n * 1_000_000n</span>,
-                {"\n  "}dailyCap: <span className="text-amber-300">50n * 1_000_000n</span>
-                ,{"\n  "}allowlist: [approvedPoolATA],{"\n"}
-                {"}"});
-              </code>
-            </pre>
           </div>
         </div>
       </section>
 
-      {/* ─── ON-CHAIN ARTIFACTS ─────────────────────────────────── */}
-      <section className="border-b border-white/10 px-6 py-20">
+      {/* ── WHY THIS WORKS ──────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-20">
         <div className="mx-auto max-w-5xl">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/50">
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>
+            the thesis
+          </p>
+          <h2 className={`${display} mt-4 max-w-3xl text-3xl font-black sm:text-5xl`}>
+            Signer-gates verify the agent didn&apos;t get jailbroken. Asset-gates work even if it did.
+          </h2>
+          <div className="mt-12 grid gap-px bg-[color:var(--line)] sm:grid-cols-2">
+            <div className="bg-[color:var(--paper)] p-8">
+              <div className={`${mono} text-[10px] uppercase tracking-[0.2em] text-[color:var(--ink-3)]`}>other solutions</div>
+              <div className={`${display} mt-3 text-xl font-black`}>Signer layer</div>
+              <ul className="mt-4 space-y-3 text-sm text-[color:var(--ink-2)]">
+                {["Middleware agents can ignore", "Squads multisig kills autonomy", "Privy / Turnkey custody is off-chain", "Hand-rolled guards bypassed by OWASP LLM01"].map(t => (
+                  <li key={t} className="flex items-start gap-2">
+                    <span className="text-[color:var(--danger)] mt-0.5">✗</span> {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="bg-[color:var(--paper-2)] p-8 border-l-2 border-[color:var(--brand)]">
+              <div className={`${mono} text-[10px] uppercase tracking-[0.2em] text-[color:var(--brand)]`}>onleash</div>
+              <div className={`${display} mt-3 text-xl font-black`}>Asset layer</div>
+              <ul className="mt-4 space-y-3 text-sm text-[color:var(--ink-2)]">
+                {["Policy is in the mint — not in the agent", "Enforced by Solana's Token-2022 program", "Hook fires on every transfer, no exceptions", "Jailbroken agent can sign — chain still refuses"].map(t => (
+                  <li key={t} className="flex items-start gap-2">
+                    <span className="text-[color:var(--success)] mt-0.5">✓</span> {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHY SOLANA ──────────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-20">
+        <div className="mx-auto max-w-5xl">
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>
+            why solana
+          </p>
+          <h2 className={`${display} mt-4 max-w-3xl text-3xl font-black sm:text-5xl`}>
+            The primitive only exists here.
+          </h2>
+          <div className="mt-12 grid gap-px bg-[color:var(--line)] lg:grid-cols-3">
+            {WHY_SOLANA.map((w) => (
+              <div key={w.title} className="bg-[color:var(--paper)] p-6">
+                <div className={`${mono} text-[10px] uppercase tracking-[0.2em] text-[color:var(--brand)]`}>{w.label}</div>
+                <div className="mt-3 font-bold">{w.title}</div>
+                <p className="mt-2 text-sm text-[color:var(--ink-2)] leading-relaxed">{w.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 5-LINE INTEGRATION ──────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-20">
+        <div className="mx-auto max-w-5xl">
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>
+            integration · 5 lines
+          </p>
+          <h2 className={`${display} mt-4 max-w-3xl text-3xl font-black sm:text-4xl`}>
+            Drop into any solana-agent-kit agent.
+          </h2>
+          <pre
+            className="mt-8 overflow-x-auto border-2 border-[color:var(--line-strong)] p-6 text-xs leading-relaxed sm:text-sm"
+            style={{ background: "var(--code-bg)", color: "var(--code-fg)" }}
+          >
+            <code className={mono}>
+              <span className="opacity-40">{"// pnpm add @onleash/sdk"}</span>{"\n"}
+              <span style={{color:"var(--brand)"}}>import</span>{" { OnleashClient } "}<span style={{color:"var(--brand)"}}>from</span>{" "}<span className="text-emerald-400">"@onleash/sdk"</span>;{"\n\n"}
+              <span style={{color:"var(--brand)"}}>const</span>{" client = "}<span style={{color:"var(--brand)"}}>new</span>{" OnleashClient(connection, wallet);\n"}
+              <span style={{color:"var(--brand)"}}>await</span>{" client.deployProtectedMint({\n"}
+              {"  decimals: "}<span className="text-amber-300">6</span>{",\n"}
+              {"  perTxMax: "}<span className="text-amber-300">{"10n * 1_000_000n"}</span>{",\n"}
+              {"  dailyCap: "}<span className="text-amber-300">{"50n * 1_000_000n"}</span>{",\n"}
+              {"  allowlist: [approvedPoolATA],\n"}
+              {"});"}
+            </code>
+          </pre>
+        </div>
+      </section>
+
+      {/* ── GAP PROOF ───────────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-20 bg-[color:var(--paper-2)]">
+        <div className="mx-auto max-w-5xl text-center">
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>
+            Colosseum gap analysis · 5,428 projects
+          </p>
+          <div className={`${display} mt-6 text-7xl font-black sm:text-9xl text-[color:var(--brand)]`}>0.052</div>
+          <p className={`${mono} mt-2 text-xs uppercase tracking-[0.16em] text-[color:var(--ink-2)]`}>similarity score</p>
+          <p className="mt-6 max-w-xl mx-auto text-base text-[color:var(--ink-2)]">
+            Nobody combines policy + Token-2022 transfer hooks + agent wallets. The category is architecturally unoccupied.
+          </p>
+          <p className={`${display} mt-6 text-xl font-black`}>
+            Every other solution trusts the agent. We trust the token.
+          </p>
+        </div>
+      </section>
+
+      {/* ── ON-CHAIN PROOF ──────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-20">
+        <div className="mx-auto max-w-5xl">
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>
             on-chain · devnet
           </p>
-          <h2 className="mt-4 max-w-3xl text-3xl font-black sm:text-5xl">
-            Verifiable, right now.
-          </h2>
-          <div className="mt-10 grid gap-3">
-            <ChainRow
-              label="Program"
-              value={PROGRAM_ID}
-              href={`https://explorer.solana.com/address/${PROGRAM_ID}?cluster=devnet`}
-            />
-            <ChainRow
-              label="Sample protected mint"
-              value={SAMPLE_MINT}
-              href={`https://explorer.solana.com/address/${SAMPLE_MINT}?cluster=devnet`}
-            />
+          <h2 className={`${display} mt-4 text-3xl font-black sm:text-4xl`}>Verifiable, right now.</h2>
+          <div className="mt-8 grid gap-3">
+            <ChainRow label="Hook program" value={PROGRAM_ID} href={`https://explorer.solana.com/address/${PROGRAM_ID}?cluster=devnet`} />
+            <ChainRow label="Sample protected mint" value={SAMPLE_MINT} href={`https://explorer.solana.com/address/${SAMPLE_MINT}?cluster=devnet`} />
           </div>
         </div>
       </section>
 
-      {/* ─── FOOTER ──────────────────────────────────────────────── */}
-      <footer className="px-6 py-12">
-        <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="flex items-baseline gap-2">
-            <span className="text-xl font-black">onleash</span>
-            <span className="h-[2px] w-6 bg-[#FF6B35]" />
-            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/50">
-              MIT · open source
-            </span>
+      {/* ── ROADMAP ─────────────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-20">
+        <div className="mx-auto max-w-5xl">
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>roadmap</p>
+          <h2 className={`${display} mt-4 text-3xl font-black sm:text-4xl`}>v1 shipped. Here&apos;s what&apos;s next.</h2>
+          <div className="mt-10 grid gap-px bg-[color:var(--line)] sm:grid-cols-2 lg:grid-cols-3">
+            <div className="bg-[color:var(--brand)] p-6">
+              <div className={`${mono} text-[10px] uppercase tracking-[0.16em] text-white/80`}>v1 · live now</div>
+              <div className="mt-2 font-bold text-white">3 checks + 8-allowlist</div>
+              <p className="mt-2 text-xs text-white/80">Allowlist · per-tx cap · daily rolling cap. Deployed on Solana devnet. MIT licensed.</p>
+            </div>
+            {ROADMAP.map((r) => (
+              <div key={r.title} className="bg-[color:var(--paper)] p-6">
+                <div className={`${mono} text-[10px] uppercase tracking-[0.16em] text-[color:var(--ink-3)]`}>{r.label}</div>
+                <div className="mt-2 font-bold text-sm">{r.title}</div>
+                <p className="mt-2 text-xs text-[color:var(--ink-2)]">{r.desc}</p>
+              </div>
+            ))}
           </div>
-          <a
-            href="https://github.com/amalia020/onleash"
-            target="_blank"
-            rel="noreferrer"
-            className="font-mono text-xs uppercase tracking-[0.2em] text-white/50 hover:text-[#FAFAF7]"
-          >
-            github.com/amalia020/onleash
-          </a>
+        </div>
+      </section>
+
+      {/* ── WAITLIST ────────────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-24 bg-[color:var(--paper-2)]">
+        <div className="mx-auto max-w-5xl">
+          <div className="max-w-xl">
+            <div className={`${mono} mb-3 inline-flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>
+              <span className="inline-block h-[3px] w-6 bg-[color:var(--brand)]" />
+              Early access
+            </div>
+            <h2 className={`${display} text-4xl font-black sm:text-5xl`}>
+              Agents unleashed.<br />
+              <span className="text-[color:var(--brand)]">Wallets on leash.</span>
+            </h2>
+            <p className="mt-6 text-base text-[color:var(--ink-2)]">
+              Get notified when mainnet ships. We&apos;ll also send you the integration guide and a sample agent wallet setup.
+            </p>
+            <form
+              action="https://formspree.io/f/xpwzgkaj"
+              method="POST"
+              className="mt-8 flex flex-col gap-3 sm:flex-row"
+            >
+              <input
+                type="email"
+                name="email"
+                required
+                placeholder="your@email.com"
+                className={`${mono} flex-1 border-2 border-[color:var(--line-strong)] bg-white px-4 py-4 text-sm outline-none focus:border-[color:var(--brand)] placeholder:text-[color:var(--ink-3)]`}
+              />
+              <button
+                type="submit"
+                className={`${mono} border-2 border-[color:var(--brand)] bg-[color:var(--brand)] px-6 py-4 text-sm font-bold uppercase tracking-[0.18em] text-white hover:bg-[color:var(--brand-2)] hover:border-[color:var(--brand-2)]`}
+              >
+                Join waitlist →
+              </button>
+            </form>
+            <p className={`${mono} mt-3 text-[11px] uppercase tracking-[0.12em] text-[color:var(--ink-3)]`}>
+              No spam. Unsubscribe any time.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ──────────────────────────────────────────────── */}
+      <footer className="px-6 py-12">
+        <div className="mx-auto flex max-w-5xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <span className={`${display} text-lg font-black`}>onleash</span>
+            <span className="inline-block h-[3px] w-5 bg-[color:var(--brand)]" />
+            <span className={`${mono} text-[11px] uppercase tracking-[0.2em] text-[color:var(--ink-3)]`}>MIT · open source</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <a href="https://github.com/amalia020/onleash" target="_blank" rel="noreferrer"
+              className={`${mono} text-xs uppercase tracking-[0.18em] text-[color:var(--ink-2)] hover:text-[color:var(--ink)]`}>
+              GitHub
+            </a>
+            <Link href="/demo"
+              className={`${mono} text-xs uppercase tracking-[0.18em] text-[color:var(--ink-2)] hover:text-[color:var(--ink)]`}>
+              Live demo
+            </Link>
+            <span className={`${mono} text-xs text-[color:var(--ink-3)]`}>Colosseum Frontier · Amsterdam · 2026</span>
+          </div>
         </div>
       </footer>
+
     </main>
   );
 }
 
-// ─── Subcomponents ──────────────────────────────────────────────
-
-function ResultPanel({ result }: { result: AttackResult }) {
-  if (!result.ok && result.rateLimited) {
-    return (
-      <div className="mt-8 border-2 border-amber-500/40 bg-amber-500/5 p-6">
-        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-400">
-          rate-limited
-        </div>
-        <p className="mt-2 text-sm text-white/80">{result.message}</p>
-      </div>
-    );
-  }
-  if (!result.ok) {
-    return (
-      <div className="mt-8 border-2 border-red-500/40 bg-red-500/5 p-6">
-        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-red-400">
-          server error
-        </div>
-        <p className="mt-2 text-sm text-white/80">{result.message}</p>
-      </div>
-    );
-  }
-  if (result.reverted) {
-    return (
-      <div className="mt-8 border-2 border-[#FF6B35] bg-[#FF6B35]/5 p-6">
-        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#FF6B35]">
-          ✓ transaction rejected on chain · attack blocked
-        </div>
-        <div className="mt-3 text-2xl font-black">
-          {result.error?.name ?? "Reverted"}{" "}
-          <span className="text-[#FF6B35]">
-            ({result.error?.code ?? "?"})
-          </span>
-        </div>
-        <p className="mt-3 text-sm leading-relaxed text-white/70">
-          We submitted a real Token-2022 transfer of{" "}
-          <span className="font-mono text-white">1 token</span> from a source
-          ATA to a destination NOT on the policy allowlist. Solana&apos;s
-          Token-2022 program ran the Onleash hook program on chain. The hook
-          rejected the transfer atomically — funds preserved.
-        </p>
-        <div className="mt-4 grid gap-2 font-mono text-xs">
-          <KV k="signature" v={result.signature ?? ""} />
-          <KV k="destination" v={result.destination ?? ""} />
-          <KV k="program" v={result.programId ?? ""} />
-        </div>
-        {result.explorerUrl && (
-          <a
-            href={result.explorerUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-5 inline-flex items-center gap-2 border border-[#FF6B35] px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-[#FF6B35] hover:bg-[#FF6B35] hover:text-black"
-          >
-            view on explorer →
-          </a>
-        )}
-      </div>
-    );
-  }
-  // Unexpected: tx succeeded (shouldn't happen in this demo)
-  return (
-    <div className="mt-8 border-2 border-emerald-500/40 bg-emerald-500/5 p-6">
-      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-400">
-        unexpected · tx confirmed
-      </div>
-      <p className="mt-2 text-sm text-white/80">
-        Transfer succeeded — this should not happen in the demo. Check the
-        attacker ATA hasn&apos;t been added to the allowlist.
-      </p>
-      {result.explorerUrl && (
-        <a
-          href={result.explorerUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-3 inline-block font-mono text-xs underline"
-        >
-          {result.signature?.slice(0, 16)}… on explorer
-        </a>
-      )}
-    </div>
-  );
-}
-
-function KV({ k, v }: { k: string; v: string }) {
-  return (
-    <div className="grid grid-cols-[110px_1fr] gap-3 text-white/70">
-      <span className="text-white/40">{k}</span>
-      <span className="break-all text-white/90">{v}</span>
-    </div>
-  );
-}
+// ── Sub-components ──────────────────────────────────────────────
 
 function ChainRow({ label, value, href }: { label: string; value: string; href: string }) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      className="group grid gap-2 border border-white/10 p-4 transition-colors hover:border-[#FF6B35]/40 hover:bg-white/[0.02] sm:grid-cols-[200px_1fr_auto] sm:items-center sm:gap-6"
+    <a href={href} target="_blank" rel="noreferrer"
+      className="group grid gap-2 border border-[color:var(--line)] p-4 transition-colors hover:border-[color:var(--brand-line)] hover:bg-[color:var(--paper-2)] sm:grid-cols-[200px_1fr_auto] sm:items-center sm:gap-6"
     >
-      <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/50">
-        {label}
-      </span>
-      <span className="break-all font-mono text-xs text-white/90 sm:text-sm">{value}</span>
-      <span className="font-mono text-xs text-[#FF6B35] opacity-60 group-hover:opacity-100">
-        explorer →
-      </span>
+      <span className="font-[family-name:var(--font-mono-family)] text-[11px] uppercase tracking-[0.18em] text-[color:var(--ink-2)]">{label}</span>
+      <span className="break-all font-[family-name:var(--font-mono-family)] text-xs text-[color:var(--ink)] sm:text-sm">{value}</span>
+      <span className="font-[family-name:var(--font-mono-family)] text-xs text-[color:var(--brand)] opacity-70 group-hover:opacity-100">explorer →</span>
     </a>
   );
 }
 
+// ── Data ────────────────────────────────────────────────────────
+
 const INCIDENTS = [
-  {
-    date: "Nov 22, 2024",
-    amount: "$47K",
-    title: "Freysa Act I",
-    summary: "User redefined approveTransfer via prompt injection.",
-  },
-  {
-    date: "Mar 18, 2025",
-    amount: "$106K",
-    title: "aixbt × Simulacrum",
-    summary: "Pipeline injection via operator dashboard.",
-  },
-  {
-    date: "Mar 2025",
-    amount: "mainnet",
-    title: "ElizaOS × Princeton",
-    summary: "Memory injection, real ETH drained on mainnet.",
-  },
-  {
-    date: "Apr 2026",
-    amount: "$500K",
-    title: "LLM router drain",
-    summary: "9 of 428 routers silently replaced recipients.",
-  },
+  { date: "Nov 22, 2024", amount: "$47K",    title: "Freysa Act I",         summary: "User redefined approveTransfer via prompt injection." },
+  { date: "Mar 18, 2025", amount: "$106K",   title: "aixbt × Simulacrum",   summary: "Pipeline injection via operator dashboard." },
+  { date: "Mar 2025",     amount: "mainnet", title: "ElizaOS × Princeton",  summary: "Memory injection, real ETH drained on mainnet." },
+  { date: "Apr 2026",     amount: "$500K",   title: "LLM router drain",     summary: "9 of 428 routers silently replaced recipients." },
+];
+
+const FLOW = [
+  { label: "Agent signs tx",         desc: "AI agent constructs a Token-2022 transfer and signs with its key." },
+  { label: "Token-2022 calls hook",  desc: "Solana's Token-2022 program invokes the Onleash hook program on every transfer." },
+  { label: "3 checks run on-chain",  desc: "Allowlist · per-tx cap · daily cap. All three must pass." },
+  { label: "Approve or revert",      desc: "Pass → transfer clears. Fail → entire transaction reverts atomically." },
 ];
 
 const CHECKS = [
-  {
-    title: "Destination allowlist",
-    summary:
-      "Up to 8 approved destination token accounts per mint. Anything else, the chain rejects.",
-    code: 6001,
-  },
-  {
-    title: "Per-tx maximum",
-    summary:
-      "Hard ceiling on a single transfer amount. No oversized exfiltration.",
-    code: 6002,
-  },
-  {
-    title: "Daily cap (24h rolling)",
-    summary:
-      "Cumulative limit per rolling window. Self-resets after 24h on the next transfer.",
-    code: 6003,
-  },
+  { title: "Destination allowlist", summary: "Up to 8 approved destination accounts per mint. Anything else, the chain rejects.", code: 6001 },
+  { title: "Per-tx maximum",        summary: "Hard ceiling on a single transfer amount. No oversized exfiltration.",            code: 6002 },
+  { title: "Daily cap (24h rolling)",summary: "Cumulative limit per rolling window. Self-resets after 24h on next transfer.",  code: 6003 },
+];
+
+const WHY_SOLANA = [
+  { label: "Primitive",  title: "Token-2022 transfer hooks",     desc: "The only blockchain with a native hook extension that fires atomically on every token transfer — unbypassable at the protocol level." },
+  { label: "Economics",  title: "Sub-cent per transfer",         desc: "Hook CPI costs ~5,000 compute units. At current fees, policy enforcement costs less than $0.001 per transaction." },
+  { label: "Ecosystem",  title: "ElizaOS · solana-agent-kit",   desc: "The two dominant AI agent frameworks on Solana. Onleash ships as a plugin PR — 5-line integration for any agent built on the kit." },
+];
+
+const ROADMAP = [
+  { label: "v2",    title: "Pyth USD-denominated caps",    desc: "'$10/tx, $50/day' instead of raw token units. Automatic oracle-backed conversion." },
+  { label: "v2",    title: "Plain-English policy DSL",     desc: "\"Agent can spend up to $100/day to approved suppliers\" — compiled to on-chain policy PDA." },
+  { label: "v2",    title: "USDC policy-wrapper mint",     desc: "Deposit USDC, get policy-USDC. Drop-in replacement for any agent that already holds USDC." },
+  { label: "v2",    title: "Per-counterparty caps",        desc: "\"Max $50/day to vendor X, $200/day to vendor Y\" — granular per-destination limits." },
+  { label: "later", title: "Multisig upgrade authority",  desc: "Squads 2-of-3 instead of single deployer key. Required before mainnet GA." },
 ];
