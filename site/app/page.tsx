@@ -331,6 +331,12 @@ export default function Home() {
   );
 }
 
+const START_STEPS = [
+  { label: "Understand the hook", desc: "See how 6 policy checks get enforced at the Solana network layer.", href: "/how-it-works" },
+  { label: "Try the playground", desc: "Configure a policy and fire transfers, no wallet or install needed.", href: "/playground" },
+  { label: "Integrate the SDK", desc: "One pnpm add and your agent wallet runs on Onleash.", href: "/integrate" },
+];
+
 const FAQ = [
   {
     q: "Why not Squads multisig?",
