@@ -9,15 +9,15 @@ const display = "font-[family-name:var(--font-display-family)]";
 
 const PRIMARY_LINKS = [
   { href: "/how-it-works", label: "How it works" },
-  { href: "/playground",   label: "Playground" },
+  { href: "/demo",         label: "Demo" },
   { href: "/integrate",    label: "Integrate" },
+  { href: "/playground",   label: "Playground" },
 ];
 
 const MORE_LINKS = [
-  { href: "/demo",      label: "Demo" },
-  { href: "/roadmap",   label: "Roadmap" },
-  { href: "/security",  label: "Security" },
-  { href: "/compose",   label: "Compose" },
+  { href: "/roadmap",  label: "Roadmap" },
+  { href: "/security", label: "Security" },
+  { href: "/compose",  label: "Compose" },
 ];
 
 export default function Nav() {
