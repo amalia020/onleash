@@ -93,6 +93,65 @@ await client.transfer({
         </div>
       </section>
 
+
+      {/* ── ERROR HANDLING ───────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-14">
+        <div className="mx-auto max-w-5xl">
+          <SectionLabel>Error handling</SectionLabel>
+          <h2 className={`${display} mt-3 text-2xl font-black sm:text-3xl`}>
+            Every policy violation throws a typed error.
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm text-[color:var(--ink-2)]">
+            The chain reverts atomically — funds never move. Parse the error code from the
+            transaction logs to give your users a clear message.
+          </p>
+          <Code>{`import { OnleashClient, OnleashError } from "@onleash/sdk";
+
+try {
+  await client.transfer({
+    mint,
+    source:      sourceATA,
+    destination: someATA,
+    owner:       payer,
+    amount:      5n * 1_000_000n,
+    decimals:    6,
+  });
+} catch (err: any) {
+  const msg = err?.message ?? String(err);
+
+  if (/6001|DestinationNotAllowed/.test(msg)) {
+    // destination not in allowlist — check your allowlist or add the ATA
+    console.error("Blocked: destination not approved");
+  } else if (/6002|ExceedsPerTxMax/.test(msg)) {
+    // single transfer too large — split into smaller amounts
+    console.error("Blocked: amount exceeds per-tx cap");
+  } else if (/6003|ExceedsDailyCap/.test(msg)) {
+    // daily budget exhausted — wait for the 24h window to roll over
+    console.error("Blocked: daily cap reached");
+  } else if (/6007|PolicyPaused/.test(msg)) {
+    // authority paused the policy — contact the mint authority
+    console.error("Blocked: policy is paused");
+  } else if (/6008|CooldownActive/.test(msg)) {
+    // too soon after last transfer — respect the cooldown_secs interval
+    console.error("Blocked: cooldown active, retry later");
+  } else if (/6009|ExceedsTransferCount/.test(msg)) {
+    // daily transfer count limit hit — wait for window to reset
+    console.error("Blocked: daily transfer count exceeded");
+  } else {
+    throw err; // unexpected — rethrow
+  }
+}`}</Code>
+          <div className="mt-6 border-2 border-[color:var(--line)] p-5 bg-[color:var(--paper-2)]">
+            <p className={`${mono} text-[10px] uppercase tracking-[0.16em] text-[color:var(--brand)] mb-3`}>tip · pre-flight check</p>
+            <p className="text-sm text-[color:var(--ink-2)] leading-relaxed">
+              Call <code className={`${mono} text-xs bg-[color:var(--paper-3)] px-1 py-0.5`}>client.fetchPolicy(mint)</code> before
+              sending to read current caps, allowlist, and <code className={`${mono} text-xs bg-[color:var(--paper-3)] px-1 py-0.5`}>spentToday</code>.
+              The chain enforces anyway — this just gives you a clearer error message before the transaction lands.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ── AI AGENT ACTIONS ─────────────────────────────────────── */}
       <section className="border-b border-[color:var(--line)] px-6 py-14">
         <div className="mx-auto max-w-5xl">
@@ -260,7 +319,12 @@ const POLICY_FIELDS = [
   { field: "daily_cap",             type: "u64",          notes: "Per 24h rolling window cap, raw units" },
   { field: "day_start_unix",        type: "i64",          notes: "Window anchor — auto-rolls when ≥86400s elapsed" },
   { field: "spent_today",           type: "u64",          notes: "Mutated atomically inside the hook" },
+  { field: "transfers_today",       type: "u32",          notes: "Count of transfers in current 24h window" },
   { field: "destination_allowlist", type: "Vec<Pubkey>",  notes: "Up to 8 approved destination token accounts" },
+  { field: "paused",                type: "bool",         notes: "true = all transfers halted; set via update_policy" },
+  { field: "cooldown_secs",         type: "i64",          notes: "Min seconds between transfers; 0 = disabled" },
+  { field: "last_transfer_unix",    type: "i64",          notes: "Timestamp of last successful transfer" },
+  { field: "max_transfers_per_day", type: "u32",          notes: "Max transfer count per 24h window; 0 = unlimited" },
 ];
 
 const ERROR_CODES = [
@@ -271,4 +335,7 @@ const ERROR_CODES = [
   { code: "6004", name: "AllowlistTooLong",      meaning: "Tried to set more than 8 allowlist entries" },
   { code: "6005", name: "Unauthorized",          meaning: "Non-authority called update_policy" },
   { code: "6006", name: "Overflow",              meaning: "u64 overflow in spent_today math" },
+  { code: "6007", name: "PolicyPaused",          meaning: "paused=true — authority has halted all transfers" },
+  { code: "6008", name: "CooldownActive",        meaning: "now < last_transfer_unix + cooldown_secs" },
+  { code: "6009", name: "ExceedsTransferCount",  meaning: "transfers_today >= max_transfers_per_day" },
 ];
