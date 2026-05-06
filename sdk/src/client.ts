@@ -366,4 +366,126 @@ export class OnleashClient {
     const signature = await sendAndConfirmTransaction(this.connection, tx, [params.owner]);
     return { signature };
   }
+  // ─── Spend-log webhook ─────────────────────────────────────────────────
+
+  /**
+   * Subscribe to on-chain policy violations for a mint (or all Onleash mints)
+   * and POST a structured payload to `webhookUrl` on every rejection.
+   *
+   * Works by subscribing to Solana logs via `connection.onLogs`. The hook
+   * program emits Anchor error codes in the transaction logs on every revert.
+   *
+   * @param opts.webhookUrl  Developer-configured URL to POST violations to.
+   * @param opts.mint        If set, only violations for this mint are reported.
+   *                         If omitted, all violations across every Onleash mint
+   *                         are reported (useful for a monitoring dashboard).
+   * @param opts.onViolation Optional in-process callback, called alongside the POST.
+   * @returns An unsubscribe function — call it to stop listening.
+   *
+   * @example
+   * const unsub = client.watchViolations({
+   *   mint: myMint,
+   *   webhookUrl: "https://your-server.com/onleash-webhook",
+   *   onViolation: (v) => console.log("blocked:", v.errorName),
+   * });
+   * // later: unsub();
+   */
+  watchViolations(opts: {
+    webhookUrl: string;
+    mint?: PublicKey;
+    onViolation?: (violation: ViolationEvent) => void;
+  }): () => void {
+    // Subscribe to the policy PDA for a specific mint, or the program itself
+    // for all mints. The policy PDA appears in every hooked transfer's account list.
+    const listenAddress = opts.mint
+      ? this.policyPda(opts.mint)
+      : this.programId;
+
+    const subId = this.connection.onLogs(
+      listenAddress,
+      (logInfo, ctx) => {
+        if (!logInfo.err) return; // only care about failures
+
+        const parsed = parseViolation(logInfo.logs, logInfo.signature, ctx.slot);
+        if (!parsed) return; // not an Onleash policy revert
+
+        opts.onViolation?.(parsed);
+
+        // Fire-and-forget POST — don't await so we don't block the log callback
+        fetch(opts.webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(parsed),
+        }).catch((err) => {
+          console.error("[onleash] webhook POST failed:", err);
+        });
+      },
+      "confirmed",
+    );
+
+    return () => {
+      this.connection.removeOnLogsListener(subId);
+    };
+  }
+}
+
+// ─── Violation payload ───────────────────────────────────────────────────────
+
+export interface ViolationEvent {
+  /** Transaction signature of the reverted transfer. */
+  signature: string;
+  /** Numeric Anchor error code (6001–6009). */
+  errorCode: number;
+  /** Human-readable error name. */
+  errorName: string;
+  /** Error message from the program. */
+  errorMessage: string;
+  /** Solana slot the log was observed in. */
+  slot: number;
+  /** ISO 8601 timestamp of when the event was observed off-chain. */
+  observedAt: string;
+}
+
+const ONLEASH_ERRORS: Record<number, { name: string; message: string }> = {
+  6000: { name: "NotTransferring",       message: "Hook called outside a transfer context" },
+  6001: { name: "DestinationNotAllowed", message: "Destination not in allowlist" },
+  6002: { name: "ExceedsPerTxMax",       message: "Amount exceeds per-tx maximum" },
+  6003: { name: "ExceedsDailyCap",       message: "Amount exceeds daily cap" },
+  6004: { name: "AllowlistTooLong",      message: "Allowlist exceeds 8 entries" },
+  6005: { name: "Unauthorized",          message: "Non-authority called update_policy" },
+  6006: { name: "Overflow",             message: "Math overflow in spent_today" },
+  6007: { name: "PolicyPaused",          message: "Policy is paused — all transfers halted" },
+  6008: { name: "CooldownActive",        message: "Cooldown active — minimum interval not elapsed" },
+  6009: { name: "ExceedsTransferCount",  message: "Daily transfer count limit reached" },
+};
+
+// Anchor encodes custom errors as 0x1770 + offset (anchor base = 0x1770 = 6000)
+const ANCHOR_BASE = 6000;
+
+function parseViolation(
+  logs: string[],
+  signature: string,
+  slot: number,
+): ViolationEvent | null {
+  for (const line of logs) {
+    // Match "custom program error: 0x177X" (hex) or "Error Number: 6001" (decimal)
+    const hexMatch = line.match(/custom program error: 0x([0-9a-fA-F]+)/);
+    if (hexMatch) {
+      const code = parseInt(hexMatch[1], 16);
+      if (code >= ANCHOR_BASE && code < ANCHOR_BASE + 100) {
+        const meta = ONLEASH_ERRORS[code];
+        if (!meta) return null;
+        return { signature, errorCode: code, errorName: meta.name, errorMessage: meta.message, slot, observedAt: new Date().toISOString() };
+      }
+    }
+    const decMatch = line.match(/Error Number: (\d+)/);
+    if (decMatch) {
+      const code = parseInt(decMatch[1], 10);
+      const meta = ONLEASH_ERRORS[code];
+      if (meta) {
+        return { signature, errorCode: code, errorName: meta.name, errorMessage: meta.message, slot, observedAt: new Date().toISOString() };
+      }
+    }
+  }
+  return null;
 }

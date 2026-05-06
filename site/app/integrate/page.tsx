@@ -249,6 +249,97 @@ const tools = createLangchainTools(agent, [...createOnleashActions(client)]);`}<
         </div>
       </section>
 
+
+      {/* ── SPEND-LOG WEBHOOK ────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-14">
+        <div className="mx-auto max-w-5xl">
+          <SectionLabel>Spend-log webhook</SectionLabel>
+          <h2 className={`${display} mt-3 text-2xl font-black sm:text-3xl`}>
+            Get notified on every policy violation.
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm text-[color:var(--ink-2)]">
+            <code className={`${mono} text-xs bg-[color:var(--paper-3)] px-1.5 py-0.5`}>client.watchViolations()</code> subscribes
+            to on-chain logs and POSTs a structured payload to any URL you configure — your Slack bot,
+            PagerDuty, custom dashboard, or serverless function. No polling. Fires within one slot of the rejected transaction.
+          </p>
+          <Code>{`import { OnleashClient } from "@onleash/sdk";
+
+const client = new OnleashClient(connection, wallet);
+
+// Watch a specific mint — fires on every policy violation for that mint
+const unsub = client.watchViolations({
+  mint:       myMint,
+  webhookUrl: "https://your-server.com/onleash-webhook",
+  onViolation: (v) => console.log("blocked:", v.errorName, v.signature),
+});
+
+// Watch ALL onleash mints (omit mint param)
+const unsubAll = client.watchViolations({
+  webhookUrl: "https://your-server.com/onleash-webhook",
+});
+
+// Stop listening
+unsub();`}</Code>
+
+          <div className="mt-8 border-2 border-[color:var(--line)] overflow-x-auto">
+            <div className="border-b border-[color:var(--line)] px-5 py-3 bg-[color:var(--paper-2)]">
+              <p className={`${mono} text-[10px] uppercase tracking-[0.16em] text-[color:var(--ink-2)]`}>Webhook payload · ViolationEvent</p>
+            </div>
+            <table className="w-full text-sm">
+              <tbody>
+                {WEBHOOK_FIELDS.map((f, i) => (
+                  <tr key={f.field} className={i < WEBHOOK_FIELDS.length - 1 ? "border-b border-[color:var(--line)]" : ""}>
+                    <td className={`${mono} p-3 text-xs text-[color:var(--brand)] whitespace-nowrap`}>{f.field}</td>
+                    <td className={`${mono} p-3 text-xs text-[color:var(--ink-2)] whitespace-nowrap`}>{f.type}</td>
+                    <td className="p-3 text-xs text-[color:var(--ink-2)]">{f.desc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-6 border-2 border-[color:var(--line)] p-5 bg-[color:var(--paper-2)]">
+            <p className={`${mono} text-[10px] uppercase tracking-[0.16em] text-[color:var(--brand)] mb-2`}>Example payload</p>
+            <Code>{`{
+  "signature":    "5KtP...q8Wz",
+  "errorCode":    6001,
+  "errorName":    "DestinationNotAllowed",
+  "errorMessage": "Destination not in allowlist",
+  "slot":         312847291,
+  "observedAt":   "2026-05-06T14:22:01.483Z"
+}`}</Code>
+          </div>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div className="border border-[color:var(--line)] p-5">
+              <p className="font-bold text-sm mb-2">Slack alert example</p>
+              <Code>{`// In your webhook receiver
+app.post("/onleash-webhook", async (req, res) => {
+  const v = req.body;
+  await slack.chat.postMessage({
+    channel: "#agent-alerts",
+    text: \`Onleash blocked \${v.errorName} (\${v.errorCode})
+\` +
+          \`Tx: \${v.signature}\`,
+  });
+  res.sendStatus(200);
+});`}</Code>
+            </div>
+            <div className="border border-[color:var(--line)] p-5">
+              <p className="font-bold text-sm mb-2">Vercel serverless example</p>
+              <Code>{`// app/api/onleash-webhook/route.ts
+export async function POST(req: Request) {
+  const v = await req.json();
+  // log to your DB, alert system, etc.
+  console.log(\`[\${v.errorName}] \${v.signature}\`);
+  await db.violations.insert(v);
+  return Response.json({ ok: true });
+}`}</Code>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── BUILD FROM SOURCE ────────────────────────────────────── */}
       <section className="px-6 py-14">
         <div className="mx-auto max-w-5xl">
@@ -272,6 +363,15 @@ SOLANA_KEYPAIR=~/.config/solana/id.json pnpm smoke`}</Code>
     </main>
   );
 }
+
+const WEBHOOK_FIELDS = [
+  { field: "signature",    type: "string", desc: "Transaction signature of the reverted transfer — link to Solana Explorer" },
+  { field: "errorCode",   type: "number", desc: "Numeric Anchor error code (6001–6009)" },
+  { field: "errorName",   type: "string", desc: "Human-readable name e.g. DestinationNotAllowed" },
+  { field: "errorMessage",type: "string", desc: "Full error message from the program" },
+  { field: "slot",        type: "number", desc: "Solana slot the violation was observed in" },
+  { field: "observedAt",  type: "string", desc: "ISO 8601 timestamp of off-chain observation" },
+];
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return <p className="font-[family-name:var(--font-mono-family)] text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]">{children}</p>;
