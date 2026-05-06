@@ -131,33 +131,42 @@ export default function Landing() {
             Solana&apos;s Token-2022 transfer-hook extension lets a mint specify a program that runs on every transfer. Onleash is that program. Three checks; any failure reverts the entire atomic transaction.
           </p>
 
-          {/* flow diagram */}
-          <div className="mt-12 flex flex-col items-start gap-0 sm:flex-row sm:items-stretch">
+          {/* flow diagram — horizontal with inline arrows */}
+          <div className="mt-14 grid grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] items-center gap-0">
             {FLOW.map((step, i) => (
-              <div key={step.label} className="flex sm:flex-col sm:flex-1 items-center sm:items-start">
-                <div className="flex sm:flex-col items-center sm:items-start gap-0 w-full">
-                  <div className="border border-[color:var(--line)] bg-[color:var(--paper-2)] p-5 sm:w-full">
-                    <div className={`${mono} text-[10px] uppercase tracking-[0.16em] text-[color:var(--brand)]`}>Step {i + 1}</div>
-                    <div className="mt-2 font-bold text-sm">{step.label}</div>
-                    <p className="mt-1 text-xs text-[color:var(--ink-2)] leading-relaxed">{step.desc}</p>
+              <>
+                <div key={step.label} className="border-2 border-[color:var(--line)] bg-[color:var(--paper-2)] p-5 h-full flex flex-col">
+                  <div className={`${mono} text-[10px] uppercase tracking-[0.16em] text-[color:var(--brand)]`}>
+                    0{i + 1}
                   </div>
-                  {i < FLOW.length - 1 && (
-                    <div className={`${mono} px-3 py-2 text-[color:var(--brand)] text-lg font-bold hidden sm:block`}>→</div>
-                  )}
+                  <div className={`${display} mt-3 text-base font-black leading-tight`}>{step.label}</div>
+                  <p className="mt-2 text-xs text-[color:var(--ink-2)] leading-relaxed flex-1">{step.desc}</p>
                 </div>
-              </div>
+                {i < FLOW.length - 1 && (
+                  <div key={`arrow-${i}`} className="flex items-center justify-center px-2">
+                    <span className={`${mono} text-xl font-bold text-[color:var(--brand)]`}>→</span>
+                  </div>
+                )}
+              </>
             ))}
           </div>
 
           {/* 3 checks */}
-          <div className="mt-12 grid gap-px bg-[color:var(--line)] lg:grid-cols-3">
+          <div className="mt-4 grid grid-cols-3 gap-0 border-2 border-[color:var(--line)]">
             {CHECKS.map((c, i) => (
-              <article key={c.title} className="bg-[color:var(--paper)] p-6">
-                <div className={`${mono} text-[10px] uppercase tracking-[0.2em] text-[color:var(--brand)]`}>Check {i + 1}</div>
-                <div className="mt-3 text-base font-bold">{c.title}</div>
-                <p className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{c.summary}</p>
-                <div className={`${mono} mt-4 text-[11px] text-[color:var(--ink-3)]`}>
-                  Error code <span className="text-[color:var(--brand)]">{c.code}</span>
+              <article
+                key={c.title}
+                className={`p-6 flex flex-col gap-3 ${i < 2 ? "border-r-2 border-[color:var(--line)]" : ""}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex h-7 w-7 items-center justify-center bg-[color:var(--brand)] text-white text-xs font-bold flex-shrink-0">
+                    {i + 1}
+                  </span>
+                  <div className="font-bold text-sm">{c.title}</div>
+                </div>
+                <p className="text-sm leading-relaxed text-[color:var(--ink-2)]">{c.summary}</p>
+                <div className={`${mono} text-[11px] text-[color:var(--ink-3)] mt-auto`}>
+                  error <span className="text-[color:var(--brand)]">{c.code}</span>
                 </div>
               </article>
             ))}
