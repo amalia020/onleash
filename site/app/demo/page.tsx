@@ -85,7 +85,7 @@ export default function Home() {
               href="https://github.com/amalia020/onleash"
               target="_blank"
               rel="noreferrer"
-              className="font-mono text-sm uppercase tracking-[0.18em] text-white/60 underline-offset-4 hover:text-[#FAFAF7] hover:underline"
+              className="font-mono text-sm uppercase tracking-[0.18em] text-white/60 underline-offset-4 hover:text-[#FAFAF7] hover:underline py-2 inline-block"
             >
               github
             </a>
@@ -140,7 +140,7 @@ export default function Home() {
             Three checks; any failure reverts the entire atomic transaction.
           </p>
 
-          <div className="mt-12 grid gap-px bg-white/10 lg:grid-cols-3">
+          <div className="mt-12 grid gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
             {CHECKS.map((c, i) => (
               <article key={c.title} className="bg-[#0A0A0A] p-6">
                 <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#FF6B35]">
@@ -260,7 +260,7 @@ function ResultPanel({ result }: { result: AttackResult }) {
   }
   if (result.reverted) {
     return (
-      <div className="mt-8 border-2 border-[#FF6B35] bg-[#FF6B35]/5 p-6">
+      <div className="mt-8 border-2 border-[#FF6B35] bg-[#FF6B35]/5 p-4 sm:p-6 overflow-hidden">
         <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#FF6B35]">
           ✓ transaction rejected on chain · attack blocked
         </div>
@@ -321,7 +321,7 @@ function ResultPanel({ result }: { result: AttackResult }) {
 
 function KV({ k, v }: { k: string; v: string }) {
   return (
-    <div className="grid grid-cols-[110px_1fr] gap-3 text-white/70">
+    <div className="grid grid-cols-[90px_1fr] gap-2 text-white/70 text-[11px]">
       <span className="text-white/40">{k}</span>
       <span className="break-all text-white/90">{v}</span>
     </div>

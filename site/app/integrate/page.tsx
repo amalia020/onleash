@@ -185,7 +185,7 @@ const tools = createLangchainTools(agent, [...createOnleashActions(client)]);`}<
           <SectionLabel>API reference · OnleashClient</SectionLabel>
           <div className="mt-6 grid gap-px bg-[color:var(--line)]">
             {API_METHODS.map(m => (
-              <div key={m.method} className="bg-[color:var(--paper)] p-5 grid sm:grid-cols-[240px_1fr] gap-3 sm:gap-6 sm:items-start">
+              <div key={m.method} className="bg-[color:var(--paper)] p-5 grid gap-3 sm:grid-cols-[220px_1fr] sm:gap-6 sm:items-start">
                 <code className={`${mono} text-sm text-[color:var(--brand)] break-all`}>{m.method}</code>
                 <p className="text-sm text-[color:var(--ink-2)]">{m.desc}</p>
               </div>
