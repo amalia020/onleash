@@ -88,6 +88,10 @@ export default function Nav() {
               className={`${mono} hidden sm:block text-xs uppercase tracking-[0.16em] text-[color:var(--ink-2)] hover:text-[color:var(--ink)]`}>
               GitHub
             </a>
+            <a href="https://x.com/getonleash" target="_blank" rel="noreferrer"
+              className={`${mono} hidden sm:block text-xs uppercase tracking-[0.16em] text-[color:var(--ink-2)] hover:text-[color:var(--ink)]`}>
+              X
+            </a>
             <Link href="/#waitlist"
               className={`${mono} hidden md:block bg-[color:var(--brand)] px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-white hover:bg-[color:var(--brand-2)] transition-colors`}>
               Join waitlist
@@ -122,6 +126,11 @@ export default function Nav() {
             onClick={() => setMobileOpen(false)}
             className={`${mono} py-3 text-sm uppercase tracking-[0.16em] border-b border-[color:var(--line)] text-[color:var(--ink-2)] hover:text-[color:var(--ink)]`}>
             GitHub →
+          </a>
+          <a href="https://x.com/getonleash" target="_blank" rel="noreferrer"
+            onClick={() => setMobileOpen(false)}
+            className={`${mono} py-3 text-sm uppercase tracking-[0.16em] border-b border-[color:var(--line)] text-[color:var(--ink-2)] hover:text-[color:var(--ink)]`}>
+            X / Twitter →
           </a>
           <Link href="/#waitlist" onClick={() => setMobileOpen(false)}
             className={`${mono} mt-4 bg-[color:var(--brand)] px-4 py-3 text-sm font-bold uppercase tracking-[0.16em] text-white text-center hover:bg-[color:var(--brand-2)] transition-colors`}>

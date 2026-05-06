@@ -322,6 +322,8 @@ export default function Home() {
             ))}
             <a href="https://github.com/amalia020/onleash" target="_blank" rel="noreferrer"
               className={`${mono} text-xs uppercase tracking-[0.16em] text-[color:var(--ink-2)] hover:text-[color:var(--ink)]`}>GitHub</a>
+            <a href="https://x.com/getonleash" target="_blank" rel="noreferrer"
+              className={`${mono} text-xs uppercase tracking-[0.16em] text-[color:var(--ink-2)] hover:text-[color:var(--ink)]`}>X / Twitter</a>
           </div>
           <span className={`${mono} text-xs text-[color:var(--ink-3)]`}>Colosseum Frontier · Amsterdam · 2026</span>
         </div>
