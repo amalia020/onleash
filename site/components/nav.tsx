@@ -13,6 +13,8 @@ const LINKS = [
   { href: "/integrate",    label: "Integrate" },
   { href: "/roadmap",      label: "Roadmap" },
   { href: "/security",     label: "Security" },
+  { href: "/playground",   label: "Playground" },
+  { href: "/compose",      label: "Compose" },
 ];
 
 export default function Nav() {
