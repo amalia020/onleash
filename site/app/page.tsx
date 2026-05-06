@@ -253,6 +253,23 @@ export default function Home() {
         </div>
       </section>
 
+
+      {/* ── FAQ ─────────────────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-20 bg-[color:var(--paper-2)]">
+        <div className="mx-auto max-w-5xl">
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>faq</p>
+          <h2 className={`${display} mt-4 text-3xl font-black sm:text-4xl`}>Why not X?</h2>
+          <div className="mt-10 grid gap-px bg-[color:var(--line)] sm:grid-cols-2">
+            {FAQ.map((q) => (
+              <article key={q.q} className="bg-[color:var(--paper)] p-7">
+                <div className={`${display} font-black text-base mb-3`}>{q.q}</div>
+                <p className="text-sm leading-relaxed text-[color:var(--ink-2)]">{q.a}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── WAITLIST ─────────────────────────────────────────────── */}
       <section id="waitlist" className="border-b border-[color:var(--line)] px-6 py-24 bg-[color:var(--paper-2)]">
         <div className="mx-auto max-w-5xl">
@@ -295,6 +312,25 @@ export default function Home() {
     </main>
   );
 }
+
+const FAQ = [
+  {
+    q: "Why not Squads multisig?",
+    a: "Multisig requires a quorum to approve every transfer — that kills autonomous agent operation. Onleash lets the agent sign freely; the chain enforces the policy without any human in the loop. You get safety without sacrificing autonomy.",
+  },
+  {
+    q: "Why not Privy or Turnkey?",
+    a: "Custody solutions control who can sign. A jailbroken agent already has signing authority — the attacker just coerces it into signing the wrong thing. Onleash operates after the signature, at the asset layer. Even a fully compromised agent can't route funds to an unapproved address.",
+  },
+  {
+    q: "Why not prompt guards or middleware?",
+    a: "Prompt guards are your first line of defence — keep them. But they run in software you control, which can be bypassed. Onleash is a second, independent layer enforced by the Solana network itself. Defence in depth: break both to drain anything.",
+  },
+  {
+    q: "Why not build this on Ethereum?",
+    a: "Ethereum has no native transfer hook. You'd need a custom ERC-20 wrapper, meaning every token is a new deployment, every DEX integration breaks, and the gas cost of a policy check per transfer is $5+. Token-2022 makes this a protocol primitive on Solana — one program, any mint, sub-cent enforcement.",
+  },
+];
 
 function ChainRow({ label, value, href }: { label: string; value: string; href: string }) {
   return (
