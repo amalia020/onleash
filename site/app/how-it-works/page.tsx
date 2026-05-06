@@ -28,7 +28,7 @@ export default function HowItWorks() {
           <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>execution flow</p>
           <h2 className={`${display} mt-4 text-2xl font-black sm:text-3xl`}>Every transfer runs this path.</h2>
 
-          <div className="mt-10 grid grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] items-stretch gap-0">
+          <div className="mt-10 hidden sm:grid sm:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] items-stretch gap-0">
             {FLOW.map((step, i) => (
               <>
                 <div key={step.label} className="border-2 border-[color:var(--line)] bg-[color:var(--paper-2)] p-5 flex flex-col">
@@ -42,6 +42,22 @@ export default function HowItWorks() {
                   </div>
                 )}
               </>
+            ))}
+          </div>
+
+          {/* Mobile-only stacked flow */}
+          <div className="mt-6 flex flex-col gap-0 sm:hidden">
+            {FLOW.map((step, i) => (
+              <div key={step.label} className="border-2 border-[color:var(--line)] bg-[color:var(--paper-2)] p-4 flex gap-4 items-start border-b-0 last:border-b-2">
+                <div className="flex-shrink-0 flex flex-col items-center gap-1 pt-0.5">
+                  <span className="font-[family-name:var(--font-mono-family)] text-[10px] uppercase tracking-[0.16em] text-[color:var(--brand)]">0{i + 1}</span>
+                  {i < FLOW.length - 1 && <span className="text-[color:var(--brand)] text-lg leading-none mt-1">↓</span>}
+                </div>
+                <div>
+                  <div className="font-[family-name:var(--font-display-family)] font-black text-sm leading-tight">{step.label}</div>
+                  <p className="mt-1 text-xs text-[color:var(--ink-2)] leading-relaxed">{step.desc}</p>
+                </div>
+              </div>
             ))}
           </div>
         </div>

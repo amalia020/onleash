@@ -321,7 +321,7 @@ function ResultPanel({ result }: { result: AttackResult }) {
 
 function KV({ k, v }: { k: string; v: string }) {
   return (
-    <div className="grid grid-cols-[90px_1fr] gap-2 text-white/70 text-[11px]">
+    <div className="grid grid-cols-[70px_1fr] gap-2 text-white/70 text-[11px] sm:grid-cols-[90px_1fr]">
       <span className="text-white/40">{k}</span>
       <span className="break-all text-white/90">{v}</span>
     </div>

@@ -50,6 +50,7 @@
 }
 
 *{box-sizing:border-box}
+html,body{max-width:100%;overflow-x:hidden}
 body{background:var(--paper);color:var(--ink);font-family:var(--font-sans-family),system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--brand);color:#fff}
 
