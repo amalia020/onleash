@@ -219,8 +219,8 @@ Roadmap will pair the hook with companion guards (permanent-delegate, policy-gat
 - [ ] Mainnet deploy
 - [ ] Public live-attack demo site
 - [ ] Companion guards (permanent-delegate, burn-policy, close-guard)
-- [ ] solana-agent-kit upstream PR
-- [ ] DEX compatibility matrix (Orca whirlpools first)
+- [x] solana-agent-kit upstream PR (draft open: [sendaifun/solana-agent-kit#565](https://github.com/sendaifun/solana-agent-kit/pull/565))
+- [ ] DEX compatibility matrix (Orca Whirlpools: **compatible** via TokenBadge — [confirmed](https://dev.orca.so/Architecture%20Overview/TokenExtensions%20Support/); Meteora DLMM next)
 
 ---
 
