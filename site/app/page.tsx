@@ -31,9 +31,9 @@ export default function Home() {
             The chain refuses to clear it.
           </p>
           <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center animate-fade-up-delay-3">
-            <Link href="/demo"
+            <Link href="/playground"
               className={`${mono} inline-flex items-center gap-3 border-2 border-[color:var(--brand)] bg-[color:var(--brand)] px-7 py-4 text-sm font-bold uppercase tracking-[0.18em] text-white hover:bg-[color:var(--brand-2)] hover:border-[color:var(--brand-2)] transition-colors`}>
-              Run attack on devnet →
+              Set your policy, try to break it →
             </Link>
             <Link href="/how-it-works"
               className={`${mono} inline-flex items-center gap-2 border-2 border-[color:var(--line-strong)] px-7 py-4 text-sm font-bold uppercase tracking-[0.18em] text-[color:var(--ink-2)] hover:border-[color:var(--brand-line)] hover:text-[color:var(--ink)] transition-colors`}>
@@ -52,6 +52,24 @@ export default function Home() {
               <div className={`${mono} mt-1 text-[10px] uppercase tracking-[0.16em] text-[color:var(--ink-2)]`}>{s.label}</div>
             </div>
           ))}
+        </div>
+      </section>
+
+
+      {/* -- START HERE -- */}
+      <section className="border-b border-[color:var(--line)] px-6 py-10">
+        <div className="mx-auto max-w-5xl">
+          <p className={`${mono} text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)] mb-6`}>Start here</p>
+          <div className="grid gap-px bg-[color:var(--line)] sm:grid-cols-3">
+            {START_STEPS.map((s, i) => (
+              <a key={s.label} href={s.href}
+                className="bg-[color:var(--paper)] px-6 py-5 hover:bg-[color:var(--paper-2)] transition-colors group">
+                <div className={`${mono} text-[10px] uppercase tracking-[0.2em] text-[color:var(--brand)] mb-2`}>Step {i + 1}</div>
+                <div className="font-bold text-sm group-hover:text-[color:var(--brand)] transition-colors">{s.label}</div>
+                <p className="mt-1 text-xs text-[color:var(--ink-2)] leading-relaxed">{s.desc}</p>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 
