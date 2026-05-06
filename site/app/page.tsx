@@ -37,6 +37,27 @@ export default function Landing() {
         </div>
       </nav>
 
+
+      {/* ── WAITLIST ────────────────────────────────────────────── */}
+      <section className="border-b border-[color:var(--line)] px-6 py-24 bg-[color:var(--paper-2)]">
+        <div className="mx-auto max-w-5xl">
+          <div className="max-w-xl">
+            <div className={`${mono} mb-3 inline-flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>
+              <span className="inline-block h-[3px] w-6 bg-[color:var(--brand)]" />
+              Early access
+            </div>
+            <h2 className={`${display} text-4xl font-black sm:text-5xl`}>
+              Agents unleashed.<br />
+              <span className="text-[color:var(--brand)]">Wallets on leash.</span>
+            </h2>
+            <p className="mt-6 text-base text-[color:var(--ink-2)]">
+              Get notified when mainnet ships. We&apos;ll also send you the integration guide and a sample agent wallet setup.
+            </p>
+            <WaitlistForm />
+          </div>
+        </div>
+      </section>
+
       {/* ── HERO ────────────────────────────────────────────────── */}
       <section className="border-b border-[color:var(--line)] px-6 pt-20 pb-28 sm:pt-28 sm:pb-36">
         <div className="mx-auto max-w-5xl">
@@ -309,25 +330,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── WAITLIST ────────────────────────────────────────────── */}
-      <section className="border-b border-[color:var(--line)] px-6 py-24 bg-[color:var(--paper-2)]">
-        <div className="mx-auto max-w-5xl">
-          <div className="max-w-xl">
-            <div className={`${mono} mb-3 inline-flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[color:var(--ink-2)]`}>
-              <span className="inline-block h-[3px] w-6 bg-[color:var(--brand)]" />
-              Early access
-            </div>
-            <h2 className={`${display} text-4xl font-black sm:text-5xl`}>
-              Agents unleashed.<br />
-              <span className="text-[color:var(--brand)]">Wallets on leash.</span>
-            </h2>
-            <p className="mt-6 text-base text-[color:var(--ink-2)]">
-              Get notified when mainnet ships. We&apos;ll also send you the integration guide and a sample agent wallet setup.
-            </p>
-            <WaitlistForm />
-          </div>
-        </div>
-      </section>
 
       {/* ── FOOTER ──────────────────────────────────────────────── */}
       <footer className="px-6 py-12">
