@@ -9,18 +9,21 @@ The agent keeps its own key. You set a policy — max 10 tokens per transfer, ma
 **[Try the live demo — watch a real attack get blocked on-chain](https://onleash.vercel.app)**
 
 [![Devnet](https://img.shields.io/badge/devnet-deployed-success)](https://explorer.solana.com/address/7vJ2fa6dr3Tnx8whNAepUMmpytAnEZxcASMyH2jAuG7v?cluster=devnet)
-[![Tests](https://img.shields.io/badge/tests-10%2F10%20passing-success)]()
+[![Tests](https://img.shields.io/badge/tests-13%2F13%20passing-success)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)]()
 
 ---
 
 ## What you get
 
-A Solana Anchor program + TypeScript SDK. You create a **policy-protected Token-2022 mint**. Your agent holds tokens from that mint. Every transfer — including CPIs from DEXes and vaults — automatically runs the Onleash hook on-chain before settling. Three checks:
+A Solana Anchor program + TypeScript SDK. You create a **policy-protected Token-2022 mint**. Your agent holds tokens from that mint. Every transfer — including CPIs from DEXes and vaults — automatically runs the Onleash hook on-chain before settling. Six checks:
 
 1. **Is this destination approved?** (allowlist of up to 8 token accounts)
 2. **Is this amount under the per-tx cap?**
 3. **Is today's cumulative spend under the daily cap?** (24h rolling window, auto-resets)
+4. **Is the policy paused?** (emergency stop — authority can freeze all transfers instantly)
+5. **Has the cooldown elapsed?** (minimum interval between transfers, prevents rapid-drain attacks)
+6. **Is the daily transfer count under the limit?** (rate-limit by count, not just value)
 
 Any failure reverts the entire transaction atomically. The agent signed it. The chain refused to clear it.
 
@@ -205,18 +208,21 @@ Requirements: Rust 1.79+, Solana CLI 3.1+, Anchor 1.0.2, Node 22+, pnpm 9+.
 
 ```
 onleash-hook
-  ✔ creates mint with transfer-hook extension                    (728ms)
-  ✔ creates source + 2 destination ATAs and mints supply         (711ms)
-  ✔ initializes ExtraAccountMetaList                             (518ms)
+  ✔ creates mint with transfer-hook extension
+  ✔ creates source + 2 destination ATAs and mints supply to source
+  ✔ initializes ExtraAccountMetaList
   ✔ initializes Policy with allowlist=[allowedDest], per_tx=10, daily=50
-  ✔ PASS: transfers 5 tokens to allowlisted destination          (909ms)
+  ✔ PASS: transfers 5 tokens to allowlisted destination
   ✔ FAIL: transfer to attacker dest reverts (DestinationNotAllowed 6001)
   ✔ FAIL: transfer 20 (> per_tx_max=10) reverts (ExceedsPerTxMax 6002)
   ✔ FAIL: 4 more 10-token transfers + 1 more reverts (ExceedsDailyCap 6003)
   ✔ FAIL: non-authority cannot update_policy (Unauthorized 6005)
   ✔ PASS: authority can raise daily_cap via update_policy
+  ✔ FAIL: transfer reverts when policy is paused (PolicyPaused 6007)
+  ✔ FAIL: second transfer within cooldown reverts (CooldownActive 6008)
+  ✔ FAIL: exceeds max_transfers_per_day (ExceedsTransferCount 6009)
 
-10 passing (8s)
+13 passing (20s)
 ```
 
 ---
@@ -232,6 +238,11 @@ onleash-hook
 | `day_start_unix` | i64 | Window anchor (auto-rolls when ≥86400s elapsed) |
 | `spent_today` | u64 | Mutated atomically inside the hook |
 | `destination_allowlist` | Vec\<Pubkey\> | Up to 8 approved destination token accounts |
+| `paused` | bool | Emergency stop — authority freezes all transfers instantly |
+| `cooldown_secs` | i64 | Minimum seconds between transfers (0 = disabled) |
+| `last_transfer_unix` | i64 | Timestamp of last successful transfer |
+| `max_transfers_per_day` | u32 | Max transfers per 24h window (0 = disabled) |
+| `transfers_today` | u32 | Transfer count in current window |
 
 Policy PDA seeds: `[b"policy", mint.key().as_ref()]`.
 
@@ -246,6 +257,9 @@ Policy PDA seeds: `[b"policy", mint.key().as_ref()]`.
 | `6004` | `AllowlistTooLong` | Tried to set >8 entries |
 | `6005` | `Unauthorized` | Non-authority called `update_policy` |
 | `6006` | `Overflow` | u64 overflow in `spent_today` math |
+| `6007` | `PolicyPaused` | Transfer attempted while policy is paused |
+| `6008` | `CooldownActive` | Minimum interval between transfers not elapsed |
+| `6009` | `ExceedsTransferCount` | Daily transfer count limit reached |
 
 ---
 

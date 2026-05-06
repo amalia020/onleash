@@ -170,6 +170,8 @@ describe("onleash-hook", () => {
         new anchor.BN(PER_TX_MAX.toString()),
         new anchor.BN(DAILY_CAP.toString()),
         [allowedDest],
+        new anchor.BN(0),   // cooldown_secs: 0 = disabled
+        0,                  // max_transfers_per_day: 0 = disabled
       )
       .accounts({
         authority: wallet.publicKey,
@@ -341,7 +343,7 @@ describe("onleash-hook", () => {
     let threw = false;
     try {
       await program.methods
-        .updatePolicy(new anchor.BN("1"), null, null)
+        .updatePolicy(new anchor.BN("1"), null, null, null, null, null)
         .accounts({
           authority: stranger.publicKey,
           mint: mint.publicKey,
@@ -361,7 +363,7 @@ describe("onleash-hook", () => {
   it("PASS: authority can raise daily_cap via update_policy", async () => {
     const newDaily = new anchor.BN((100n * 1_000_000n).toString());
     await program.methods
-      .updatePolicy(null, newDaily, null)
+      .updatePolicy(null, newDaily, null, null, null, null)
       .accounts({
         authority: wallet.publicKey,
         mint: mint.publicKey,
@@ -369,5 +371,121 @@ describe("onleash-hook", () => {
       .rpc();
     const policy = await program.account.policy.fetch(policyPda);
     expect(policy.dailyCap.toString()).to.eq(newDaily.toString());
+  });
+  // ─── Pause: emergency stop ───────────────────────────────────────────────
+
+  it("FAIL: transfer reverts when policy is paused (PolicyPaused 6007)", async () => {
+    await program.methods
+      .updatePolicy(null, null, null, true, null, null)
+      .accounts({ authority: wallet.publicKey, mint: mint.publicKey } as any)
+      .rpc({ commitment: "confirmed", skipPreflight: true });
+
+    const amount = 1n * 1_000_000n;
+    const ix = await createTransferCheckedWithTransferHookInstruction(
+      connection, sourceTokenAccount, mint.publicKey, allowedDest,
+      wallet.publicKey, amount, decimals, [], "confirmed", TOKEN_2022_PROGRAM_ID,
+    );
+    let threw = false;
+    try {
+      await sendAndConfirmTransaction(connection, new Transaction().add(ix), [wallet.payer], { skipPreflight: true, commitment: "confirmed" });
+    } catch (e: any) {
+      threw = true;
+      const msg = (e.transactionLogs || e.logs || [e.message]).join(" ");
+      console.log("  reverted as expected (PolicyPaused)");
+      assert.match(msg, /PolicyPaused|0x1777|6007/);
+    }
+    assert.isTrue(threw, "expected paused policy to revert");
+    await program.methods
+      .updatePolicy(null, null, null, false, null, null)
+      .accounts({ authority: wallet.publicKey, mint: mint.publicKey } as any)
+      .rpc({ commitment: "confirmed", skipPreflight: true });
+  });
+
+  // ─── Cooldown ────────────────────────────────────────────────────────────
+
+  it("FAIL: second transfer within cooldown reverts (CooldownActive 6008)", async () => {
+    const amount = 1n * 1_000_000n;
+    // Step 1: make a transfer with cooldown=0 to set last_transfer_unix to now
+    await program.methods
+      .updatePolicy(null, null, null, null, new anchor.BN(0), null)
+      .accounts({ authority: wallet.publicKey, mint: mint.publicKey } as any)
+      .rpc({ commitment: "confirmed", skipPreflight: true });
+
+    const ix0 = await createTransferCheckedWithTransferHookInstruction(
+      connection, sourceTokenAccount, mint.publicKey, allowedDest,
+      wallet.publicKey, amount, decimals, [], "confirmed", TOKEN_2022_PROGRAM_ID,
+    );
+    await sendAndConfirmTransaction(connection, new Transaction().add(ix0), [wallet.payer], { skipPreflight: true, commitment: "confirmed" });
+    console.log("  baseline transfer done, last_transfer_unix set to now");
+
+    // Step 2: enable 1-hour cooldown
+    await program.methods
+      .updatePolicy(null, null, null, null, new anchor.BN(3600), null)
+      .accounts({ authority: wallet.publicKey, mint: mint.publicKey } as any)
+      .rpc({ commitment: "confirmed", skipPreflight: true });
+
+    // Step 3: immediate transfer should revert with CooldownActive
+    const ix1 = await createTransferCheckedWithTransferHookInstruction(
+      connection, sourceTokenAccount, mint.publicKey, allowedDest,
+      wallet.publicKey, amount, decimals, [], "confirmed", TOKEN_2022_PROGRAM_ID,
+    );
+    let threw = false;
+    try {
+      await sendAndConfirmTransaction(connection, new Transaction().add(ix1), [wallet.payer], { skipPreflight: true, commitment: "confirmed" });
+    } catch (e: any) {
+      threw = true;
+      const msg = (e.transactionLogs || e.logs || [e.message]).join(" ");
+      console.log("  reverted as expected (CooldownActive)");
+      assert.match(msg, /CooldownActive|0x1778|6008/);
+    }
+    assert.isTrue(threw, "expected cooldown violation to revert");
+    // Reset
+    await program.methods
+      .updatePolicy(null, null, null, null, new anchor.BN(0), null)
+      .accounts({ authority: wallet.publicKey, mint: mint.publicKey } as any)
+      .rpc({ commitment: "confirmed", skipPreflight: true });
+  });
+
+  // ─── Transfer count limit ────────────────────────────────────────────────
+
+  it("FAIL: exceeds max_transfers_per_day (ExceedsTransferCount 6009)", async () => {
+    const amount = 1n * 1_000_000n;
+    const policyBefore = await program.account.policy.fetch(policyPda);
+    const currentCount = (policyBefore as any).transfersToday as number;
+    console.log("  transfers_today:", currentCount);
+
+    // Set limit to currentCount+1 so exactly one more transfer is allowed
+    await program.methods
+      .updatePolicy(null, new anchor.BN((1000n * 1_000_000n).toString()), null, null, null, currentCount + 1)
+      .accounts({ authority: wallet.publicKey, mint: mint.publicKey } as any)
+      .rpc({ commitment: "confirmed", skipPreflight: true });
+
+    // This transfer pushes count to the limit
+    const ix1 = await createTransferCheckedWithTransferHookInstruction(
+      connection, sourceTokenAccount, mint.publicKey, allowedDest,
+      wallet.publicKey, amount, decimals, [], "confirmed", TOKEN_2022_PROGRAM_ID,
+    );
+    await sendAndConfirmTransaction(connection, new Transaction().add(ix1), [wallet.payer], { skipPreflight: true, commitment: "confirmed" });
+    console.log("  transfer at count limit: ok");
+
+    // Next transfer hits ExceedsTransferCount
+    const ix2 = await createTransferCheckedWithTransferHookInstruction(
+      connection, sourceTokenAccount, mint.publicKey, allowedDest,
+      wallet.publicKey, amount, decimals, [], "confirmed", TOKEN_2022_PROGRAM_ID,
+    );
+    let threw = false;
+    try {
+      await sendAndConfirmTransaction(connection, new Transaction().add(ix2), [wallet.payer], { skipPreflight: true, commitment: "confirmed" });
+    } catch (e: any) {
+      threw = true;
+      const msg = (e.transactionLogs || e.logs || [e.message]).join(" ");
+      console.log("  reverted as expected (ExceedsTransferCount)");
+      assert.match(msg, /ExceedsTransferCount|0x1779|6009/);
+    }
+    assert.isTrue(threw, "expected transfer count violation to revert");
+    await program.methods
+      .updatePolicy(null, null, null, null, null, 0)
+      .accounts({ authority: wallet.publicKey, mint: mint.publicKey } as any)
+      .rpc({ commitment: "confirmed", skipPreflight: true });
   });
 });

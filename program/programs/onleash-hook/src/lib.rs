@@ -40,6 +40,12 @@ pub enum OnleashError {
     Unauthorized,
     #[msg("Math overflow")]
     Overflow,
+    #[msg("Policy is paused — all transfers halted by authority")]
+    PolicyPaused,
+    #[msg("Cooldown active — minimum interval between transfers not elapsed")]
+    CooldownActive,
+    #[msg("Daily transfer count limit reached")]
+    ExceedsTransferCount,
 }
 
 #[program]
@@ -64,8 +70,11 @@ pub mod onleash_hook {
         per_tx_max: u64,
         daily_cap: u64,
         allowlist: Vec<Pubkey>,
+        cooldown_secs: i64,
+        max_transfers_per_day: u32,
     ) -> Result<()> {
         require!(allowlist.len() <= MAX_ALLOWLIST, OnleashError::AllowlistTooLong);
+        require!(cooldown_secs >= 0, OnleashError::Overflow);
         let policy = &mut ctx.accounts.policy;
         policy.authority = ctx.accounts.authority.key();
         policy.mint = ctx.accounts.mint.key();
@@ -73,7 +82,12 @@ pub mod onleash_hook {
         policy.daily_cap = daily_cap;
         policy.day_start_unix = Clock::get()?.unix_timestamp;
         policy.spent_today = 0;
+        policy.transfers_today = 0;
         policy.destination_allowlist = allowlist;
+        policy.paused = false;
+        policy.cooldown_secs = cooldown_secs;
+        policy.last_transfer_unix = 0;
+        policy.max_transfers_per_day = max_transfers_per_day;
         Ok(())
     }
 
@@ -82,6 +96,9 @@ pub mod onleash_hook {
         per_tx_max: Option<u64>,
         daily_cap: Option<u64>,
         allowlist: Option<Vec<Pubkey>>,
+        paused: Option<bool>,
+        cooldown_secs: Option<i64>,
+        max_transfers_per_day: Option<u32>,
     ) -> Result<()> {
         let policy = &mut ctx.accounts.policy;
         require_keys_eq!(
@@ -89,16 +106,18 @@ pub mod onleash_hook {
             ctx.accounts.authority.key(),
             OnleashError::Unauthorized
         );
-        if let Some(v) = per_tx_max {
-            policy.per_tx_max = v;
-        }
-        if let Some(v) = daily_cap {
-            policy.daily_cap = v;
-        }
+        if let Some(v) = per_tx_max { policy.per_tx_max = v; }
+        if let Some(v) = daily_cap { policy.daily_cap = v; }
         if let Some(v) = allowlist {
             require!(v.len() <= MAX_ALLOWLIST, OnleashError::AllowlistTooLong);
             policy.destination_allowlist = v;
         }
+        if let Some(v) = paused { policy.paused = v; }
+        if let Some(v) = cooldown_secs {
+            require!(v >= 0, OnleashError::Overflow);
+            policy.cooldown_secs = v;
+        }
+        if let Some(v) = max_transfers_per_day { policy.max_transfers_per_day = v; }
         Ok(())
     }
 
@@ -107,36 +126,65 @@ pub mod onleash_hook {
         check_is_transferring(&ctx)?;
 
         let policy = &mut ctx.accounts.policy;
-
-        // 1. Destination allowlist
-        require!(
-            policy
-                .destination_allowlist
-                .contains(&ctx.accounts.destination_token.key()),
-            OnleashError::DestinationNotAllowed
-        );
-
-        // 2. Per-tx cap
-        require!(amount <= policy.per_tx_max, OnleashError::ExceedsPerTxMax);
-
-        // 3. Daily cap with rolling 24-hour window
         let now = Clock::get()?.unix_timestamp;
+
+        // Roll the daily window if 24h has elapsed
         if now.saturating_sub(policy.day_start_unix) >= ONE_DAY_SECONDS {
             policy.day_start_unix = now;
             policy.spent_today = 0;
+            policy.transfers_today = 0;
         }
+
+        // Check 1: Pause — emergency stop, authority can freeze all transfers
+        require!(!policy.paused, OnleashError::PolicyPaused);
+
+        // Check 2: Destination allowlist
+        require!(
+            policy.destination_allowlist.contains(&ctx.accounts.destination_token.key()),
+            OnleashError::DestinationNotAllowed
+        );
+
+        // Check 3: Per-tx cap
+        require!(amount <= policy.per_tx_max, OnleashError::ExceedsPerTxMax);
+
+        // Check 4: Daily spend cap
         let new_total = policy
             .spent_today
             .checked_add(amount)
             .ok_or(OnleashError::Overflow)?;
         require!(new_total <= policy.daily_cap, OnleashError::ExceedsDailyCap);
+
+        // Check 5: Cooldown — minimum time between transfers (0 = disabled)
+        if policy.cooldown_secs > 0 {
+            require!(
+                now.saturating_sub(policy.last_transfer_unix) >= policy.cooldown_secs,
+                OnleashError::CooldownActive
+            );
+        }
+
+        // Check 6: Daily transfer count (0 = disabled)
+        if policy.max_transfers_per_day > 0 {
+            require!(
+                policy.transfers_today < policy.max_transfers_per_day,
+                OnleashError::ExceedsTransferCount
+            );
+        }
+
+        // All checks passed — commit state mutations
         policy.spent_today = new_total;
+        policy.last_transfer_unix = now;
+        policy.transfers_today = policy.transfers_today
+            .checked_add(1)
+            .ok_or(OnleashError::Overflow)?;
 
         msg!(
-            "onleash: ok amount={} spent_today={} daily_cap={}",
+            "onleash: ok amount={} spent_today={} transfers_today={} cooldown_remaining={}s",
             amount,
             policy.spent_today,
-            policy.daily_cap
+            policy.transfers_today,
+            if policy.cooldown_secs > 0 {
+                policy.cooldown_secs.saturating_sub(now.saturating_sub(policy.last_transfer_unix))
+            } else { 0 }
         );
 
         Ok(())
@@ -157,6 +205,8 @@ fn check_is_transferring(ctx: &Context<TransferHook>) -> Result<()> {
     }
     Ok(())
 }
+
+// ─── Account contexts ────────────────────────────────────────────────────────
 
 #[derive(Accounts)]
 pub struct InitializeExtraAccountMetaList<'info> {
@@ -180,8 +230,6 @@ pub struct InitializeExtraAccountMetaList<'info> {
 
 impl<'info> InitializeExtraAccountMetaList<'info> {
     pub fn extra_account_metas() -> Result<Vec<ExtraAccountMeta>> {
-        // Tell token-2022 to pass the per-mint Policy PDA on every transfer.
-        // AccountKey index 1 = mint (per ExecuteInstruction account ordering).
         Ok(vec![ExtraAccountMeta::new_with_seeds(
             &[
                 Seed::Literal { bytes: b"policy".to_vec() },
@@ -207,8 +255,8 @@ pub struct InitPolicy<'info> {
         init,
         seeds = [b"policy", mint.key().as_ref()],
         bump,
-        // 8 disc + 32 + 32 + 8 + 8 + 8 + 8 + (4 + 32*8) = 364, pad to 400
-        space = 400,
+        // 8 disc + 32 + 32 + 8 + 8 + 8 + 8 + (4+32*8) + 1 + 8 + 8 + 4 + 4 = ~395 → pad to 450
+        space = 450,
         payer = authority,
     )]
     pub policy: Account<'info, Policy>,
@@ -243,9 +291,17 @@ pub struct TransferHook<'info> {
 pub struct Policy {
     pub authority: Pubkey,
     pub mint: Pubkey,
+    // ── Spend limits ──────────────────────────────────────────────────────
     pub per_tx_max: u64,
     pub daily_cap: u64,
     pub day_start_unix: i64,
     pub spent_today: u64,
-    pub destination_allowlist: Vec<Pubkey>,
+    // ── Destination control ───────────────────────────────────────────────
+    pub destination_allowlist: Vec<Pubkey>,     // max 8
+    // ── Advanced controls ─────────────────────────────────────────────────
+    pub paused: bool,                           // emergency stop
+    pub cooldown_secs: i64,                     // min seconds between transfers (0 = disabled)
+    pub last_transfer_unix: i64,                // timestamp of last successful transfer
+    pub max_transfers_per_day: u32,             // max transfers per 24h window (0 = disabled)
+    pub transfers_today: u32,                   // transfer count in current window
 }
