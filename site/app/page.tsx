@@ -1,4 +1,5 @@
 import Link from "next/link";
+import WaitlistForm from "@/components/waitlist-form";
 
 const PROGRAM_ID = "7vJ2fa6dr3Tnx8whNAepUMmpytAnEZxcASMyH2jAuG7v";
 const SAMPLE_MINT = "2KkYRVS2cBnneryveAYxH5hGfnNhdFruXAc4NjeAekcZ";
@@ -339,28 +340,7 @@ export default function Landing() {
             <p className="mt-6 text-base text-[color:var(--ink-2)]">
               Get notified when mainnet ships. We&apos;ll also send you the integration guide and a sample agent wallet setup.
             </p>
-            <form
-              action="https://formspree.io/f/xpwzgkaj"
-              method="POST"
-              className="mt-8 flex flex-col gap-3 sm:flex-row"
-            >
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="your@email.com"
-                className={`${mono} flex-1 border-2 border-[color:var(--line-strong)] bg-white px-4 py-4 text-sm outline-none focus:border-[color:var(--brand)] placeholder:text-[color:var(--ink-3)]`}
-              />
-              <button
-                type="submit"
-                className={`${mono} border-2 border-[color:var(--brand)] bg-[color:var(--brand)] px-6 py-4 text-sm font-bold uppercase tracking-[0.18em] text-white hover:bg-[color:var(--brand-2)] hover:border-[color:var(--brand-2)]`}
-              >
-                Join waitlist →
-              </button>
-            </form>
-            <p className={`${mono} mt-3 text-[11px] uppercase tracking-[0.12em] text-[color:var(--ink-3)]`}>
-              No spam. Unsubscribe any time.
-            </p>
+            <WaitlistForm />
           </div>
         </div>
       </section>
